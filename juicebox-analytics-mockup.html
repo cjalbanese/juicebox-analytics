@@ -194,8 +194,8 @@
   <!-- Main -->
   <div class="main">
     <div class="mode-toggle">
-      <button class="mode-btn" onclick="setMode('mvp')">MVP</button>
-      <button class="mode-btn active" onclick="setMode('populated')">v2+</button>
+      <button class="mode-btn active" onclick="setMode('mvp')">MVP</button>
+      <button class="mode-btn" onclick="setMode('populated')">v2+</button>
       <button class="mode-btn" onclick="setMode('empty')">Empty State</button>
     </div>
     <div class="page-header">
@@ -1278,7 +1278,7 @@ function renderAgents() {
 // ══════════════════════════════════════
 // TAB / MODE SWITCHING
 // ══════════════════════════════════════
-let currentTab = 'projects', currentMode = 'populated';
+let currentTab = 'projects', currentMode = 'mvp';
 const MVP_TABS = ['usage', 'projects'];
 const ALL_TABS = ['usage', 'projects', 'outreach', 'agents'];
 
@@ -1393,7 +1393,7 @@ document.addEventListener('click', e => {
 
 // Init
 populateUserDropdowns();
-renderCurrentTab();
+setMode('mvp');
 </script>
 </body>
 </html>
