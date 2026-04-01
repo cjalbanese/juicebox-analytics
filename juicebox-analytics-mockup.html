@@ -180,8 +180,8 @@
         <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>Sequences</div>
         <div class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17V11M12 17V7M16 17V13"/></svg>Analytics</div>
         <div class="sidebar-sub" id="analytics-subnav">
-          <div class="sidebar-item active" data-tab="usage" onclick="switchTab('usage')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Usage</div>
-          <div class="sidebar-item" data-tab="projects" onclick="switchTab('projects')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Projects</div>
+          <div class="sidebar-item active" data-tab="projects" onclick="switchTab('projects')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Projects</div>
+          <div class="sidebar-item" data-tab="usage" onclick="switchTab('usage')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Usage</div>
           <div class="sidebar-item" data-tab="outreach" onclick="switchTab('outreach')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>Outreach</div>
           <div class="sidebar-item" data-tab="agents" onclick="switchTab('agents')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1a4 4 0 01-8 0V6a4 4 0 014-4z"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 12l2 2 4-4"/></svg>Agents</div>
         </div>
@@ -199,12 +199,12 @@
       <button class="mode-btn" onclick="setMode('empty')">Empty State</button>
     </div>
     <div class="page-header">
-      <div class="breadcrumb">Analytics &gt; <span id="breadcrumb-tab">Usage</span></div>
-      <div class="page-title" id="page-title">Usage</div>
+      <div class="breadcrumb">Analytics &gt; <span id="breadcrumb-tab">Projects</span></div>
+      <div class="page-title" id="page-title">Projects</div>
     </div>
     <div class="analytics-tabs">
-      <div class="analytics-tab active" data-tab="usage" onclick="switchTab('usage')">Usage</div>
-      <div class="analytics-tab" data-tab="projects" onclick="switchTab('projects')">Projects</div>
+      <div class="analytics-tab active" data-tab="projects" onclick="switchTab('projects')">Projects</div>
+      <div class="analytics-tab" data-tab="usage" onclick="switchTab('usage')">Usage</div>
       <div class="analytics-tab" data-tab="outreach" onclick="switchTab('outreach')">Outreach</div>
       <div class="analytics-tab" data-tab="agents" onclick="switchTab('agents')">Agents</div>
     </div>
@@ -212,7 +212,7 @@
     <div class="content-area">
 
       <!-- ═══ USAGE ═══ -->
-      <div id="tab-usage" class="tab-content">
+      <div id="tab-usage" class="tab-content hidden">
         <div class="global-filters">
           <div class="global-filters-label">Page filters</div>
           <div class="filter-group"><div class="filter-label">Date range</div><select class="filter-select" id="usage-date" onchange="renderUsage()"><option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="90">Last 90 days</option></select></div>
@@ -238,7 +238,7 @@
       </div>
 
       <!-- ═══ PROJECTS ═══ -->
-      <div id="tab-projects" class="tab-content hidden">
+      <div id="tab-projects" class="tab-content">
         <div class="global-filters">
           <div class="global-filters-label">Page filters</div>
           <div class="filter-group"><div class="filter-label">Date range</div><select class="filter-select" id="proj-date" onchange="renderProjects()"><option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="90">Last 90 days</option></select></div>
@@ -250,7 +250,7 @@
           <div id="proj-kpis" class="kpi-row cols-4"></div>
           <div class="insights-section v2-only" id="proj-insights"></div>
           <div class="charts-row"><div class="chart-card full"><div class="chart-title" id="proj-funnel-title">Aggregate sourcing funnel</div><div class="chart-container"><canvas id="projects-funnel-chart"></canvas></div></div></div>
-          <div class="table-section"><div class="table-header"><div class="table-title">Projects by pipeline health</div></div><table data-sort-table="proj"><thead><tr><th class="sortable" data-col="name">Project</th><th class="sortable" data-col="user">Collaborators</th><th class="sortable" data-col="status">Status</th><th class="sortable has-tip" data-col="found">Found<span class="tip-text">Candidate profiles discovered by search or agent.</span></th><th class="sortable has-tip" data-col="reviewed">Reviewed<span class="tip-text">Profiles viewed in detail.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to shortlist.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="replied">Replied<span class="tip-text">Candidates who replied (any sentiment).</span></th><th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied positively.</span></th><th class="sortable has-tip" data-col="iRate">Interested %<span class="tip-text">Interested ÷ contacted.</span></th></tr></thead><tbody id="proj-table-body"></tbody></table></div>
+          <div class="table-section"><div class="table-header"><div class="table-title">Projects by pipeline health</div></div><table data-sort-table="proj"><thead><tr><th class="sortable" data-col="name">Project</th><th class="sortable" data-col="user">Collaborators</th><th class="sortable" data-col="status">Status</th><th class="sortable has-tip" data-col="found">Found<span class="tip-text">Candidate profiles discovered by search or agent.</span></th><th class="sortable has-tip" data-col="reviewed">Reviewed<span class="tip-text">Profiles viewed in detail.</span></th><th class="sortable has-tip" data-col="approved">Approved<span class="tip-text">Candidates approved during calibration review.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to shortlist.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="replied">Replied<span class="tip-text">Candidates who replied (any sentiment).</span></th><th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied positively.</span></th><th class="sortable has-tip" data-col="iRate">Interested %<span class="tip-text">Interested ÷ contacted.</span></th></tr></thead><tbody id="proj-table-body"></tbody></table></div>
         </div>
         <div class="state-empty hidden"><div class="empty-state"><svg viewBox="0 0 120 120" fill="none" stroke="#DDD" stroke-width="2"><rect x="15" y="10" width="90" height="30" rx="4"/><rect x="15" y="48" width="90" height="30" rx="4"/><rect x="15" y="86" width="90" height="30" rx="4"/><path d="M30 25h50M30 63h40M30 101h45" stroke-width="3" stroke-linecap="round"/></svg><h3>No project data yet</h3><p>Create a project and start building your candidate pipeline.</p><button class="cta-btn">Create new project</button></div></div>
       </div>
@@ -357,14 +357,14 @@ const PREV_MULT = { '7': 0.82, '30': 0.78, '90': 0.71, '365': 0.45 }; // prior p
 
 // Projects
 const PROJECTS = [
-  { name:'Senior Backend Engineer', users:['Sarah Kim','Mike Chen'],       status:'Active',    found:312, reviewed:245, shortlisted:68, contacted:52, replied:18, interested:9,  velocity:1.8 },
-  { name:'ML Engineer',             users:['Mike Chen'],                   status:'Active',    found:189, reviewed:156, shortlisted:42, contacted:38, replied:11, interested:6,  velocity:2.1 },
-  { name:'Product Designer',        users:['Rachel Torres','Emily Liu'],   status:'Active',    found:156, reviewed:134, shortlisted:35, contacted:30, replied:8,  interested:4,  velocity:2.5 },
-  { name:'DevOps Lead',             users:['David Park'],                  status:'Active',    found:98,  reviewed:78,  shortlisted:22, contacted:18, replied:4,  interested:1,  velocity:3.2 },
-  { name:'Frontend Engineer',       users:['Emily Liu'],                   status:'Active',    found:267, reviewed:210, shortlisted:55, contacted:48, replied:14, interested:7,  velocity:1.6 },
-  { name:'Head of Data',            users:['Sarah Kim','Tom Nguyen'],      status:'Paused',    found:45,  reviewed:38,  shortlisted:12, contacted:8,  replied:2,  interested:0,  velocity:4.1 },
-  { name:'Solutions Engineer',      users:['James Wu'],                    status:'Active',    found:134, reviewed:112, shortlisted:28, contacted:24, replied:7,  interested:3,  velocity:2.8 },
-  { name:'Staff Engineer',          users:['Tom Nguyen','Sarah Kim'],      status:'Completed', found:220, reviewed:195, shortlisted:51, contacted:44, replied:16, interested:8,  velocity:1.4 },
+  { name:'Senior Backend Engineer', users:['Sarah Kim','Mike Chen'],       status:'Active',    found:312, reviewed:245, approved:180, shortlisted:68, contacted:52, replied:18, interested:9,  velocity:1.8 },
+  { name:'ML Engineer',             users:['Mike Chen'],                   status:'Active',    found:189, reviewed:156, approved:112, shortlisted:42, contacted:38, replied:11, interested:6,  velocity:2.1 },
+  { name:'Product Designer',        users:['Rachel Torres','Emily Liu'],   status:'Active',    found:156, reviewed:134, approved:95,  shortlisted:35, contacted:30, replied:8,  interested:4,  velocity:2.5 },
+  { name:'DevOps Lead',             users:['David Park'],                  status:'Active',    found:98,  reviewed:78,  approved:52,  shortlisted:22, contacted:18, replied:4,  interested:1,  velocity:3.2 },
+  { name:'Frontend Engineer',       users:['Emily Liu'],                   status:'Active',    found:267, reviewed:210, approved:155, shortlisted:55, contacted:48, replied:14, interested:7,  velocity:1.6 },
+  { name:'Head of Data',            users:['Sarah Kim','Tom Nguyen'],      status:'Paused',    found:45,  reviewed:38,  approved:28,  shortlisted:12, contacted:8,  replied:2,  interested:0,  velocity:4.1 },
+  { name:'Solutions Engineer',      users:['James Wu'],                    status:'Active',    found:134, reviewed:112, approved:78,  shortlisted:28, contacted:24, replied:7,  interested:3,  velocity:2.8 },
+  { name:'Staff Engineer',          users:['Tom Nguyen','Sarah Kim'],      status:'Completed', found:220, reviewed:195, approved:142, shortlisted:51, contacted:44, replied:16, interested:8,  velocity:1.4 },
 ];
 
 // Sequences — each sequence can be used across multiple projects.
@@ -781,7 +781,7 @@ function renderProjects() {
   let filtered = PROJECTS.filter(p => (userFilter==='all' || p.users.includes(userFilter)) && (statusFilter==='all' || p.status===statusFilter) && (projectFilter==='all' || p.name===projectFilter));
 
   // Scale numeric fields by date range
-  const scaleFields = ['found','reviewed','shortlisted','contacted','replied','interested'];
+  const scaleFields = ['found','reviewed','approved','shortlisted','contacted','replied','interested'];
   filtered = filtered.map(p => {
     const scaled = { ...p };
     scaleFields.forEach(f => scaled[f] = Math.round(p[f] * projDateMult));
@@ -803,9 +803,9 @@ function renderProjects() {
 
   document.getElementById('proj-funnel-title').textContent = `Sourcing funnel${userFilter!=='all' ? ' — '+userFilter : ''}${statusFilter!=='all' ? ' ('+statusFilter+')' : ''}`;
 
-  const funnelData = ['found','reviewed','shortlisted','contacted','replied','interested'].map(f => sumField(filtered, f));
+  const funnelData = ['found','reviewed','approved','shortlisted','contacted','replied','interested'].map(f => sumField(filtered, f));
   destroyChart('projects-funnel-chart');
-  charts['projects-funnel-chart'] = new Chart(document.getElementById('projects-funnel-chart'), { type:'bar', data:{ labels:['Found','Reviewed','Shortlisted','Contacted','Replied','Interested'], datasets:[{ data:funnelData, backgroundColor:['rgba(123,44,191,0.15)','rgba(123,44,191,0.28)','rgba(123,44,191,0.42)','rgba(123,44,191,0.58)','rgba(123,44,191,0.78)',P], borderRadius:6, barPercentage:0.7 }] }, options:{...chartOpts, layout:{padding:{top:16}}, scales:{...chartOpts.scales, y:{...chartOpts.scales.y, grace:'10%'}}, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex; const pct=i>0?((funnelData[i]/funnelData[i-1])*100).toFixed(1)+'% conversion':'100%'; return `${ctx.parsed.y.toLocaleString()} (${pct})`;}}}}} });
+  charts['projects-funnel-chart'] = new Chart(document.getElementById('projects-funnel-chart'), { type:'bar', data:{ labels:['Found','Reviewed','Approved','Shortlisted','Contacted','Replied','Interested'], datasets:[{ data:funnelData, backgroundColor:['rgba(123,44,191,0.15)','rgba(123,44,191,0.22)','rgba(123,44,191,0.35)','rgba(123,44,191,0.48)','rgba(123,44,191,0.60)','rgba(123,44,191,0.78)',P], borderRadius:6, barPercentage:0.7 }] }, options:{...chartOpts, layout:{padding:{top:16}}, scales:{...chartOpts.scales, y:{...chartOpts.scales.y, grace:'10%'}}, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex; const pct=i>0?((funnelData[i]/funnelData[i-1])*100).toFixed(1)+'% conversion':'100%'; return `${ctx.parsed.y.toLocaleString()} (${pct})`;}}}}} });
 
   const projRows = filtered.map(p => ({
     ...p, user: p.users.join(', '), iRate: p.contacted > 0 ? +(p.interested/p.contacted*100).toFixed(1) : 0
@@ -816,7 +816,7 @@ function renderProjects() {
     return projSortDir==='desc' ? bv-av : av-bv;
   });
   document.getElementById('proj-table-body').innerHTML = projRows.map(p =>
-    `<tr><td style="font-weight:600">${p.name}</td><td>${p.users.join(', ')}</td><td>${statusBadge(p.status)}</td><td>${p.found}</td><td>${p.reviewed}</td><td>${p.shortlisted}</td><td>${p.contacted}</td><td>${p.replied}</td><td>${p.interested}</td><td style="font-weight:600;color:#333">${p.iRate}%</td></tr>`
+    `<tr><td style="font-weight:600">${p.name}</td><td>${p.users.join(', ')}</td><td>${statusBadge(p.status)}</td><td>${p.found}</td><td>${p.reviewed}</td><td>${p.approved}</td><td>${p.shortlisted}</td><td>${p.contacted}</td><td>${p.replied}</td><td>${p.interested}</td><td style="font-weight:600;color:#333">${p.iRate}%</td></tr>`
   ).join('');
 
   // Project insights — only actionable, each with an in-product CTA
@@ -1276,7 +1276,7 @@ function renderAgents() {
 // ══════════════════════════════════════
 // TAB / MODE SWITCHING
 // ══════════════════════════════════════
-let currentTab = 'usage', currentMode = 'populated';
+let currentTab = 'projects', currentMode = 'populated';
 const MVP_TABS = ['usage', 'projects'];
 const ALL_TABS = ['usage', 'projects', 'outreach', 'agents'];
 
@@ -1323,6 +1323,15 @@ function setMode(mode) {
   if (mode === 'mvp' && !MVP_TABS.includes(currentTab)) {
     switchTab('projects');
     return;
+  }
+
+  // MVP auto-filter: simulate logged-in user seeing their own data
+  if (mode === 'mvp') {
+    document.getElementById('usage-user').value = 'Sarah Kim';
+    document.getElementById('proj-user').value = 'Sarah Kim';
+  } else {
+    document.getElementById('usage-user').value = 'all';
+    document.getElementById('proj-user').value = 'all';
   }
 
   // Hide MVP-specific elements in v2+ mode and vice versa
