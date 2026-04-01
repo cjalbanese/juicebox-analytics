@@ -123,6 +123,21 @@
   .pagination-btn:hover { background:#F5F5F5; }
   .pagination-btn:disabled { opacity:0.4; cursor:default; }
 
+  /* ── Insights section ── */
+  .insights-section { padding:0 28px 20px; }
+  .insights-header { font-size:14px; font-weight:600; color:#333; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .insights-header .badge { font-size:11px; font-weight:500; background:#EDE9FE; color:#7B2CBF; padding:2px 8px; border-radius:10px; }
+  .insight-cards { display:flex; flex-direction:column; gap:10px; }
+  .insight-card { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; border-radius:8px; border:1px solid #EAEAEA; background:#FAFAFA; }
+  .insight-icon { flex-shrink:0; width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .insight-icon.positive { background:#D1FAE5; }
+  .insight-icon.warning { background:#FEF3C7; }
+  .insight-icon.action { background:#EDE9FE; }
+  .insight-body { flex:1; }
+  .insight-title { font-size:13px; font-weight:600; color:#333; margin-bottom:2px; }
+  .insight-desc { font-size:12px; color:#666; line-height:1.5; }
+  .insight-desc strong { color:#333; }
+
   /* ── Plan usage bars ── */
   .plan-card { background: #fff; border: 1px solid #EAEAEA; border-radius: 8px; padding: 16px; }
   .plan-card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
@@ -200,6 +215,8 @@
         <div class="state-populated pad-top">
           <div id="usage-kpis-outcome" class="kpi-row cols-4"></div>
           <div id="usage-kpis-activity" class="kpi-row cols-5"></div>
+          <!-- Insights -->
+          <div class="insights-section" id="usage-insights"></div>
           <!-- Plan usage -->
           <div id="usage-plan-section" style="padding:0 28px 16px;">
             <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:12px;">Plan usage <span style="font-size:12px;font-weight:400;color:#999;">this billing period</span></div>
@@ -233,6 +250,7 @@
         </div>
         <div class="state-populated pad-top">
           <div id="proj-kpis" class="kpi-row cols-4"></div>
+          <div class="insights-section" id="proj-insights"></div>
           <div class="charts-row"><div class="chart-card full"><div class="chart-title" id="proj-funnel-title">Aggregate sourcing funnel</div><div class="chart-container"><canvas id="projects-funnel-chart"></canvas></div></div></div>
           <div class="table-section"><div class="table-header"><div class="table-title">Projects by pipeline health</div></div><table data-sort-table="proj"><thead><tr><th class="sortable" data-col="name">Project</th><th class="sortable" data-col="user">Recruiter</th><th class="sortable" data-col="status">Status</th><th class="sortable has-tip" data-col="found">Found<span class="tip-text">Candidate profiles discovered by search or agent.</span></th><th class="sortable has-tip" data-col="reviewed">Reviewed<span class="tip-text">Profiles viewed in detail.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to shortlist.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="replied">Replied<span class="tip-text">Candidates who replied (any sentiment).</span></th><th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied positively.</span></th><th class="sortable has-tip" data-col="iRate">Interested %<span class="tip-text">Interested ÷ contacted.</span></th></tr></thead><tbody id="proj-table-body"></tbody></table></div>
         </div>
@@ -255,6 +273,7 @@
         </div>
         <div class="state-populated">
           <div id="out-kpis" class="kpi-row cols-6"></div>
+          <div class="insights-section" id="out-insights"></div>
           <div style="display:flex;justify-content:flex-end;padding:0 28px 8px;">
             <div class="filter-group"><div class="filter-label">Grouped by</div><select class="filter-select" id="out-group" onchange="renderOutreach()" style="font-size:12px;padding:5px 24px 5px 10px;"><option value="months">Months</option><option value="weeks">Weeks</option></select></div>
           </div>
@@ -300,6 +319,7 @@
         </div>
         <div class="state-populated">
           <div id="ag-kpis" class="kpi-row cols-5"></div>
+          <div class="insights-section" id="ag-insights"></div>
           <div style="display:flex;justify-content:flex-end;padding:0 28px 8px;">
             <div class="filter-group"><div class="filter-label">Grouped by</div><select class="filter-select" id="ag-group" onchange="renderAgents()" style="font-size:12px;padding:5px 24px 5px 10px;"><option value="weeks">Weeks</option><option value="days">Days</option><option value="months">Months</option></select></div>
           </div>
@@ -597,6 +617,19 @@ let projSortCol = 'interested', projSortDir = 'desc';
 let outSortCol = 'total', outSortDir = 'desc';
 let agSortCol = 'found', agSortDir = 'desc';
 
+// ══════════════════════════════════════
+// INSIGHTS ENGINE
+// ══════════════════════════════════════
+function renderInsight(icon, type, title, desc) {
+  return `<div class="insight-card"><div class="insight-icon ${type}">${icon}</div><div class="insight-body"><div class="insight-title">${title}</div><div class="insight-desc">${desc}</div></div></div>`;
+}
+
+function renderInsightsBlock(containerId, insights) {
+  const el = document.getElementById(containerId);
+  if (!el || !insights.length) { if (el) el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="insights-header">Insights <span class="badge">${insights.length}</span></div><div class="insight-cards">${insights.join('')}</div>`;
+}
+
 function renderUsage() {
   if (currentMode === 'empty') return;
   const dateMult = DATE_MULT[document.getElementById('usage-date').value];
@@ -659,6 +692,58 @@ function renderUsage() {
       <div class="plan-bar"><div class="plan-bar-fill" style="width:${exportPct}%;background:${exportPct > 90 ? '#dc2626' : exportPct > 70 ? '#D97706' : '#B84BEE'}"></div></div>
       <div class="plan-detail">${daysRemaining} days remaining</div>
     </div>`;
+
+  // Usage insights
+  const usageInsights = [];
+  if (userFilter === 'all' && users.length > 2) {
+    const perfs = users.map(u => {
+      const d = USER_DATA[u];
+      const cont = Math.round(d.contacted * dateMult);
+      const intr = Math.round(d.interested * dateMult);
+      return { name: u, contacted: cont, interested: intr, rate: cont > 0 ? intr/cont*100 : 0, searches: Math.round(d.searches * dateMult), reviewed: Math.round(d.reviewed * dateMult), contacts: Math.round(d.contacts * dateMult) };
+    }).filter(p => p.contacted >= 5);
+
+    const best = perfs.reduce((a,b) => a.rate > b.rate ? a : b, perfs[0]);
+    const worst = perfs.reduce((a,b) => a.rate < b.rate ? a : b, perfs[0]);
+    if (best && worst && best.name !== worst.name && best.rate - worst.rate > 3) {
+      usageInsights.push(renderInsight('↑', 'positive',
+        `${best.name} is converting at ${best.rate.toFixed(1)}% — ${(best.rate / worst.rate).toFixed(1)}x higher than ${worst.name}`,
+        `Consider having <strong>${best.name}</strong> share their search criteria and outreach templates with the team. Their approach could lift the team average from ${rate.toFixed(1)}% to closer to ${(rate + (best.rate - rate) * 0.3).toFixed(1)}%.`
+      ));
+    }
+
+    const lowActivity = perfs.filter(p => p.searches < 15 && p.contacted < 10);
+    if (lowActivity.length > 0) {
+      const names = lowActivity.map(p => p.name).join(', ');
+      usageInsights.push(renderInsight('!', 'warning',
+        `${lowActivity.length === 1 ? names + ' has' : names + ' have'} low search and outreach activity`,
+        `Fewer than 15 searches and 10 contacts this period. This may indicate onboarding friction, competing priorities, or the need for search calibration help.`
+      ));
+    }
+
+    const creditPerfs = perfs.filter(p => p.contacts > 10 && p.interested > 0);
+    if (creditPerfs.length >= 2) {
+      const bestCred = creditPerfs.reduce((a,b) => (a.contacts/a.interested) < (b.contacts/b.interested) ? a : b);
+      const worstCred = creditPerfs.reduce((a,b) => (a.contacts/a.interested) > (b.contacts/b.interested) ? a : b);
+      if (bestCred.name !== worstCred.name) {
+        const bestRatio = Math.round(bestCred.contacts / bestCred.interested);
+        const worstRatio = Math.round(worstCred.contacts / worstCred.interested);
+        if (worstRatio > bestRatio * 2) {
+          usageInsights.push(renderInsight('$', 'action',
+            `Credit efficiency varies ${(worstRatio/bestRatio).toFixed(1)}x across the team`,
+            `<strong>${bestCred.name}</strong> uses ${bestRatio} contact credits per interested reply vs. <strong>${worstCred.name}</strong> at ${worstRatio}. Reviewing ${worstCred.name}'s targeting criteria could save <strong>${Math.round((worstRatio - bestRatio) * worstCred.interested)} credits</strong> per period.`
+          ));
+        }
+      }
+    }
+  }
+  if (projectedContacts > contactLimit) {
+    usageInsights.push(renderInsight('!', 'warning',
+      `On pace to exceed contact credit limit by ${Math.round(projectedContacts - contactLimit).toLocaleString()} credits`,
+      `At current burn rate, you'll hit the ${contactLimit.toLocaleString()} limit with ${daysRemaining} days left. Consider upgrading or prioritizing higher-signal candidates before revealing contacts.`
+    ));
+  }
+  renderInsightsBlock('usage-insights', usageInsights);
 
   // Charts
   const grouping = document.getElementById('usage-group').value;
@@ -743,6 +828,45 @@ function renderProjects() {
   document.getElementById('proj-table-body').innerHTML = projRows.map(p =>
     `<tr><td style="font-weight:600">${p.name}</td><td>${p.user}</td><td>${statusBadge(p.status)}</td><td>${p.found}</td><td>${p.reviewed}</td><td>${p.shortlisted}</td><td>${p.contacted}</td><td>${p.replied}</td><td>${p.interested}</td><td style="font-weight:600;color:#333">${p.iRate}%</td></tr>`
   ).join('');
+
+  // Project insights
+  const projInsights = [];
+  const activeProjs = projRows.filter(p => p.status === 'Active');
+
+  // Bottleneck detection: lots found but few contacted
+  activeProjs.forEach(p => {
+    if (p.found > 100 && p.contacted < p.found * 0.15) {
+      projInsights.push(renderInsight('⚡', 'action',
+        `${p.name} has a review bottleneck`,
+        `<strong>${p.found}</strong> candidates found but only <strong>${p.contacted}</strong> contacted (${(p.contacted/p.found*100).toFixed(0)}%). ${p.user} may need help reviewing the backlog, or the search criteria could be tightened to surface higher-signal candidates.`
+      ));
+    }
+  });
+
+  // Top performing project
+  const ratedProjs = activeProjs.filter(p => p.contacted >= 10);
+  if (ratedProjs.length >= 2) {
+    const bestProj = ratedProjs.reduce((a,b) => a.iRate > b.iRate ? a : b);
+    const avgRate = ratedProjs.reduce((s,p) => s+p.iRate, 0) / ratedProjs.length;
+    if (bestProj.iRate > avgRate * 1.3) {
+      projInsights.push(renderInsight('★', 'positive',
+        `${bestProj.name} is outperforming at ${bestProj.iRate}% interest rate`,
+        `${(bestProj.iRate / avgRate).toFixed(1)}x the project average of ${avgRate.toFixed(1)}%. ${bestProj.user}'s search and outreach strategy on this role could be a template for other projects.`
+      ));
+    }
+  }
+
+  // Stalled project: no interested replies
+  activeProjs.forEach(p => {
+    if (p.contacted >= 15 && p.interested === 0) {
+      projInsights.push(renderInsight('!', 'warning',
+        `${p.name} has ${p.contacted} contacts but zero interested replies`,
+        `This role may need a different sourcing approach. Consider reviewing the candidate criteria, adjusting the outreach sequence, or pausing to recalibrate with the hiring manager.`
+      ));
+    }
+  });
+
+  renderInsightsBlock('proj-insights', projInsights);
 }
 
 // ══════════════════════════════════════
@@ -883,8 +1007,52 @@ function renderOutreach() {
 
   // Cache aggregated rows for the table, then render via separate paginated function
   window._outreachSeqRows = buildSeqRows(filtered);
-  outPage = 0; // reset to first page on filter change
+  outPage = 0;
   renderOutreachTable();
+
+  // Outreach insights
+  const outInsights = [];
+  const seqRows = window._outreachSeqRows || [];
+  const seqsWithVolume = seqRows.filter(s => s.total >= 20);
+
+  if (seqsWithVolume.length >= 2) {
+    // Best and worst sequences by interest rate
+    const rates = seqsWithVolume.map(s => ({ ...s, intRate: s.total > 0 ? s.interested/s.total*100 : 0 }));
+    const bestSeq = rates.reduce((a,b) => a.intRate > b.intRate ? a : b);
+    const worstSeq = rates.reduce((a,b) => a.intRate < b.intRate ? a : b);
+    if (bestSeq.seq !== worstSeq.seq && bestSeq.intRate > worstSeq.intRate * 1.5) {
+      outInsights.push(renderInsight('↑', 'positive',
+        `"${bestSeq.seq}" converts ${(bestSeq.intRate / worstSeq.intRate).toFixed(1)}x better than "${worstSeq.seq}"`,
+        `${bestSeq.intRate.toFixed(1)}% vs ${worstSeq.intRate.toFixed(1)}% interest rate. If "${worstSeq.seq}" matched "${bestSeq.seq}"'s conversion, that's <strong>~${Math.round((bestSeq.intRate - worstSeq.intRate) / 100 * worstSeq.total)} more interested replies</strong> from existing volume.`
+      ));
+    }
+
+    // High bounce rate
+    const highBounce = seqsWithVolume.filter(s => s.total > 0 && s.bounced/s.total > 0.05);
+    if (highBounce.length > 0) {
+      const worst = highBounce.reduce((a,b) => b.bounced/b.total > a.bounced/a.total ? b : a);
+      outInsights.push(renderInsight('!', 'warning',
+        `"${worst.seq}" has a ${(worst.bounced/worst.total*100).toFixed(1)}% bounce rate`,
+        `${worst.bounced} of ${worst.total} messages bounced. This hurts sender reputation and wastes credits. Check that contact data is fresh before sending — consider enabling email verification if available.`
+      ));
+    }
+  }
+
+  // LinkedIn opportunity
+  const linkedinRuns = filtered.filter(r => r.channel === 'linkedin');
+  const emailRuns = filtered.filter(r => r.channel === 'email');
+  if (linkedinRuns.length > 0 && emailRuns.length > 0) {
+    const liReplyRate = sumField(linkedinRuns,'total') > 0 ? sumField(linkedinRuns,'replied')/sumField(linkedinRuns,'total')*100 : 0;
+    const emReplyRate = sumField(emailRuns,'total') > 0 ? sumField(emailRuns,'replied')/sumField(emailRuns,'total')*100 : 0;
+    if (liReplyRate > emReplyRate * 1.2) {
+      outInsights.push(renderInsight('💬', 'action',
+        `LinkedIn InMail reply rate is ${(liReplyRate/emReplyRate).toFixed(1)}x higher than email`,
+        `${liReplyRate.toFixed(1)}% vs ${emReplyRate.toFixed(1)}%. Consider expanding LinkedIn outreach to more sequences — only ${[...new Set(linkedinRuns.map(r=>r.seq))].length} of ${seqRows.length} sequences currently use it.`
+      ));
+    }
+  }
+
+  renderInsightsBlock('out-insights', outInsights);
 }
 
 // Aggregate runs into sequence rows
@@ -1053,6 +1221,51 @@ function renderAgents() {
   document.getElementById('ag-table-body').innerHTML = agRows.map(a =>
     `<tr><td style="font-weight:600">${a.name}</td><td>${a.owner}</td><td>${statusBadge(a.status)}</td><td>${a.found}</td><td><div class="progress-bar"><div class="progress-fill" style="width:${a.approvalRate}%"></div></div>${a.approvalRate}%</td><td>${a.shortlisted}</td><td>${a.contacted}</td><td>${a.interested}</td><td style="font-weight:600;color:#333">${a.iRate}%</td></tr>`
   ).join('');
+
+  // Agent insights
+  const agInsights = [];
+  const activeAgents = agRows.filter(a => a.status === 'Active');
+
+  // Low approval rate = agent needs calibration
+  activeAgents.forEach(a => {
+    if (a.approvalRate < 65 && a.found >= 20) {
+      agInsights.push(renderInsight('⚙', 'action',
+        `"${a.name}" has a ${a.approvalRate}% approval rate — consider recalibrating`,
+        `${a.owner} is rejecting ${100-a.approvalRate}% of this agent's suggestions. Tightening the agent's search criteria or adding negative examples from rejected candidates could significantly improve signal-to-noise.`
+      ));
+    }
+  });
+
+  // Agent ROI framing
+  if (activeAgents.length > 0) {
+    const totalAgentFound = activeAgents.reduce((s,a) => s+a.found, 0);
+    const totalAgentInterested = activeAgents.reduce((s,a) => s+a.interested, 0);
+    const agentCost = activeAgents.length * 199;
+    if (totalAgentInterested > 0) {
+      const costPerInterested = Math.round(agentCost / totalAgentInterested);
+      agInsights.push(renderInsight('$', 'positive',
+        `Agents are generating interested replies at $${costPerInterested} each`,
+        `${activeAgents.length} active agent${activeAgents.length>1?'s':''} ($${agentCost}/mo) sourced <strong>${totalAgentFound}</strong> candidates, leading to <strong>${totalAgentInterested}</strong> interested replies this period. ${costPerInterested < 100 ? 'This is strong ROI compared to typical recruiter sourcing costs.' : 'Consider whether higher-calibration agents could improve this ratio.'}`
+      ));
+    }
+  }
+
+  // Best performing agent
+  if (activeAgents.length >= 2) {
+    const ratedAgents = activeAgents.filter(a => a.contacted >= 5);
+    if (ratedAgents.length >= 2) {
+      const bestAgent = ratedAgents.reduce((a,b) => a.iRate > b.iRate ? a : b);
+      const avgAgRate = ratedAgents.reduce((s,a) => s+a.iRate, 0) / ratedAgents.length;
+      if (bestAgent.iRate > avgAgRate * 1.2) {
+        agInsights.push(renderInsight('★', 'positive',
+          `"${bestAgent.name}" leads with ${bestAgent.iRate}% interest rate`,
+          `${(bestAgent.iRate / avgAgRate).toFixed(1)}x the agent average of ${avgAgRate.toFixed(1)}%. Review its search criteria and use it as a baseline when configuring new agents.`
+        ));
+      }
+    }
+  }
+
+  renderInsightsBlock('ag-insights', agInsights);
 }
 
 // ══════════════════════════════════════
