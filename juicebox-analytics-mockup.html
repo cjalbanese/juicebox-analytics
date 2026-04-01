@@ -59,6 +59,7 @@
   .kpi-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
   .kpi-row.cols-6 { grid-template-columns: repeat(6, 1fr); }
   .kpi-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .kpi-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
   .kpi-card { background: #fff; border: 1px solid #EAEAEA; border-radius: 8px; padding: 16px; }
   .kpi-label { font-size: 12.5px; color: #777; font-weight: 500; margin-bottom: 6px; }
   .kpi-value { font-size: 28px; font-weight: 700; color: #111; }
@@ -137,6 +138,10 @@
   .insight-title { font-size:13px; font-weight:600; color:#333; margin-bottom:2px; }
   .insight-desc { font-size:12px; color:#666; line-height:1.5; }
   .insight-desc strong { color:#333; }
+  .insight-dismiss { flex-shrink:0; width:20px; height:20px; border:none; background:none; color:#CCC; font-size:16px; cursor:pointer; padding:0; line-height:20px; text-align:center; border-radius:4px; }
+  .insight-dismiss:hover { color:#999; background:#F0F0F0; }
+  .insight-cta { display:inline-block; margin-top:6px; font-size:12px; font-weight:600; color:#7B2CBF; cursor:pointer; text-decoration:none; }
+  .insight-cta:hover { text-decoration:underline; }
 
   /* ── Plan usage bars ── */
   .plan-card { background: #fff; border: 1px solid #EAEAEA; border-radius: 8px; padding: 16px; }
@@ -183,13 +188,14 @@
         <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>Integrations</div>
       </div>
     </div>
-    <div class="sidebar-bottom"><div class="sidebar-user"><div class="sidebar-avatar">CA</div><div class="sidebar-user-info"><div class="name">Christopher Albanese</div><div class="org">Acme Talent</div></div></div></div>
+    <div class="sidebar-bottom"><div class="sidebar-user"><div class="sidebar-avatar">CA</div><div class="sidebar-user-info"><div class="name">Christopher Albanese</div><div class="org">BoxedJuice</div></div></div></div>
   </div>
 
   <!-- Main -->
   <div class="main">
     <div class="mode-toggle">
-      <button class="mode-btn active" onclick="setMode('populated')">With Data</button>
+      <button class="mode-btn" onclick="setMode('mvp')">MVP</button>
+      <button class="mode-btn active" onclick="setMode('populated')">v2+</button>
       <button class="mode-btn" onclick="setMode('empty')">Empty State</button>
     </div>
     <div class="page-header">
@@ -213,27 +219,19 @@
           <div class="filter-group"><div class="filter-label">Team member</div><select class="filter-select" id="usage-user" onchange="renderUsage()"><option value="all">All users</option></select></div>
         </div>
         <div class="state-populated pad-top">
-          <div id="usage-kpis-outcome" class="kpi-row cols-4"></div>
-          <div id="usage-kpis-activity" class="kpi-row cols-5"></div>
+          <div id="usage-kpis-outcome" class="kpi-row cols-3"></div>
           <!-- Insights -->
-          <div class="insights-section" id="usage-insights"></div>
+          <div class="insights-section v2-only" id="usage-insights"></div>
           <!-- Plan usage -->
           <div id="usage-plan-section" style="padding:0 28px 16px;">
             <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:12px;">Plan usage <span style="font-size:12px;font-weight:400;color:#999;">this billing period</span></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="usage-plan-cards"></div>
           </div>
 
-          <div style="display:flex;justify-content:flex-end;padding:0 28px 8px;">
-            <div class="filter-group"><div class="filter-label">Grouped by</div><select class="filter-select" id="usage-group" onchange="renderUsage()" style="font-size:12px;padding:5px 24px 5px 10px;"><option value="weeks">Weeks</option><option value="days">Days</option><option value="months">Months</option></select></div>
-          </div>
-          <div class="charts-row">
-            <div class="chart-card"><div class="chart-title">Contact credits used (email/phone)</div><div class="chart-container"><canvas id="usage-credits-chart"></canvas></div></div>
-            <div class="chart-card"><div class="chart-title">Export credits used (CSV/PDF)</div><div class="chart-container"><canvas id="usage-exports-chart"></canvas></div></div>
-          </div>
           <div class="charts-row"><div class="chart-card full"><div class="chart-title">Team activity over time<div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#7B2CBF"></div>Searches</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#B84BEE"></div>Reviewed</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#16a34a"></div>Shortlisted</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#D97706"></div>Contacted</div></div></div><div class="chart-container"><canvas id="usage-activity-chart"></canvas></div></div></div>
           <div class="table-section">
             <div class="table-header"><div class="table-title">Team activity</div></div>
-            <table><thead><tr><th>Recruiter</th><th class="sortable sorted-desc has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied with positive interest.</span></th><th class="sortable has-tip" data-col="rate">Interest Rate<span class="tip-text">Interested replies ÷ candidates contacted.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="searches">Searches<span class="tip-text">Total AI-powered searches run.</span></th><th class="sortable has-tip" data-col="reviewed">Reviewed<span class="tip-text">Candidate profiles viewed in detail.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to a project shortlist.</span></th><th class="sortable has-tip" data-col="contacts">Contact Credits<span class="tip-text">Contact credits used to reveal email/phone.</span></th><th class="sortable has-tip" data-col="exports">Export Credits<span class="tip-text">Export credits used (CSV/PDF).</span></th></tr></thead><tbody id="usage-table-body"></tbody></table>
+            <table><thead><tr><th>Collaborator</th><th class="sortable sorted-desc has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied with positive interest.</span></th><th class="sortable has-tip" data-col="rate">Interest Rate<span class="tip-text">Interested replies ÷ candidates contacted.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="searches">Searches<span class="tip-text">Total AI-powered searches run.</span></th><th class="sortable has-tip" data-col="reviewed">Reviewed<span class="tip-text">Candidate profiles viewed in detail.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to a project shortlist.</span></th><th class="sortable has-tip" data-col="contacts">Contact Credits<span class="tip-text">Contact credits used to reveal email/phone.</span></th><th class="sortable has-tip" data-col="exports">Export Credits<span class="tip-text">Export credits used (CSV/PDF).</span></th></tr></thead><tbody id="usage-table-body"></tbody></table>
           </div>
         </div>
         <div class="state-empty hidden"><div class="empty-state"><svg viewBox="0 0 120 120" fill="none" stroke="#DDD" stroke-width="2"><rect x="10" y="20" width="100" height="80" rx="8"/><path d="M30 70V50M50 70V40M70 70V55M90 70V35" stroke-width="4" stroke-linecap="round"/></svg><h3>No usage data yet</h3><p>Once your team starts searching, reviewing profiles, and using agents, you'll see activity trends and outcomes here.</p><button class="cta-btn">Run your first search</button></div></div>
@@ -244,15 +242,15 @@
         <div class="global-filters">
           <div class="global-filters-label">Page filters</div>
           <div class="filter-group"><div class="filter-label">Date range</div><select class="filter-select" id="proj-date" onchange="renderProjects()"><option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="90">Last 90 days</option></select></div>
-          <div class="filter-group"><div class="filter-label">Recruiter</div><select class="filter-select" id="proj-user" onchange="renderProjects()"><option value="all">All recruiters</option></select></div>
+          <div class="filter-group"><div class="filter-label">Collaborator</div><select class="filter-select" id="proj-user" onchange="renderProjects()"><option value="all">All collaborators</option></select></div>
           <div class="filter-group"><div class="filter-label">Status</div><select class="filter-select" id="proj-status" onchange="renderProjects()"><option value="all">All statuses</option><option value="Active">Active</option><option value="Paused">Paused</option><option value="Completed">Completed</option></select></div>
           <div class="filter-group"><div class="filter-label">Project</div><select class="filter-select" id="proj-project" onchange="renderProjects()"><option value="all">All projects</option></select></div>
         </div>
         <div class="state-populated pad-top">
           <div id="proj-kpis" class="kpi-row cols-4"></div>
-          <div class="insights-section" id="proj-insights"></div>
+          <div class="insights-section v2-only" id="proj-insights"></div>
           <div class="charts-row"><div class="chart-card full"><div class="chart-title" id="proj-funnel-title">Aggregate sourcing funnel</div><div class="chart-container"><canvas id="projects-funnel-chart"></canvas></div></div></div>
-          <div class="table-section"><div class="table-header"><div class="table-title">Projects by pipeline health</div></div><table data-sort-table="proj"><thead><tr><th class="sortable" data-col="name">Project</th><th class="sortable" data-col="user">Recruiter</th><th class="sortable" data-col="status">Status</th><th class="sortable has-tip" data-col="found">Found<span class="tip-text">Candidate profiles discovered by search or agent.</span></th><th class="sortable has-tip" data-col="reviewed">Reviewed<span class="tip-text">Profiles viewed in detail.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to shortlist.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="replied">Replied<span class="tip-text">Candidates who replied (any sentiment).</span></th><th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied positively.</span></th><th class="sortable has-tip" data-col="iRate">Interested %<span class="tip-text">Interested ÷ contacted.</span></th></tr></thead><tbody id="proj-table-body"></tbody></table></div>
+          <div class="table-section"><div class="table-header"><div class="table-title">Projects by pipeline health</div></div><table data-sort-table="proj"><thead><tr><th class="sortable" data-col="name">Project</th><th class="sortable" data-col="user">Collaborators</th><th class="sortable" data-col="status">Status</th><th class="sortable has-tip" data-col="found">Found<span class="tip-text">Candidate profiles discovered by search or agent.</span></th><th class="sortable has-tip" data-col="reviewed">Reviewed<span class="tip-text">Profiles viewed in detail.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to shortlist.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="replied">Replied<span class="tip-text">Candidates who replied (any sentiment).</span></th><th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied positively.</span></th><th class="sortable has-tip" data-col="iRate">Interested %<span class="tip-text">Interested ÷ contacted.</span></th></tr></thead><tbody id="proj-table-body"></tbody></table></div>
         </div>
         <div class="state-empty hidden"><div class="empty-state"><svg viewBox="0 0 120 120" fill="none" stroke="#DDD" stroke-width="2"><rect x="15" y="10" width="90" height="30" rx="4"/><rect x="15" y="48" width="90" height="30" rx="4"/><rect x="15" y="86" width="90" height="30" rx="4"/><path d="M30 25h50M30 63h40M30 101h45" stroke-width="3" stroke-linecap="round"/></svg><h3>No project data yet</h3><p>Create a project and start building your candidate pipeline.</p><button class="cta-btn">Create new project</button></div></div>
       </div>
@@ -268,13 +266,13 @@
           <div class="section-filters-label">Sequence filters</div>
           <div class="filter-group"><div class="filter-label">Sequence</div><select class="filter-select" id="out-seq" onchange="renderOutreach()"><option value="all">All sequences</option></select></div>
           <div class="filter-group"><div class="filter-label">Project</div><select class="filter-select" id="out-proj" onchange="renderOutreach()"><option value="all">All projects</option></select></div>
-          <div class="filter-group"><div class="filter-label">Inboxes</div><select class="filter-select" id="out-inbox" onchange="renderOutreach()"><option value="all">All inboxes</option></select></div>
           <div class="filter-group"><div class="filter-label">Channel</div><select class="filter-select" id="out-channel" onchange="renderOutreach()"><option value="all">All channels</option><option value="email">Email</option><option value="linkedin">LinkedIn InMail</option><option value="sms">SMS</option></select></div>
         </div>
         <div class="state-populated">
-          <div id="out-kpis" class="kpi-row cols-6"></div>
+          <div id="out-kpis" class="kpi-row cols-3"></div>
+          <div id="out-channel-breakdown" style="padding:0 28px 16px;font-size:13px;color:#555;"></div>
           <div class="insights-section" id="out-insights"></div>
-          <div style="display:flex;justify-content:flex-end;padding:0 28px 8px;">
+          <div style="display:flex;justify-content:flex-start;padding:0 28px 8px;">
             <div class="filter-group"><div class="filter-label">Grouped by</div><select class="filter-select" id="out-group" onchange="renderOutreach()" style="font-size:12px;padding:5px 24px 5px 10px;"><option value="months">Months</option><option value="weeks">Weeks</option></select></div>
           </div>
           <div class="charts-row">
@@ -318,16 +316,15 @@
           <div class="filter-group"><div class="filter-label">Status</div><select class="filter-select" id="ag-status" onchange="renderAgents()"><option value="all">All statuses</option><option value="Active">Active</option><option value="Paused">Paused</option></select></div>
         </div>
         <div class="state-populated">
-          <div id="ag-kpis" class="kpi-row cols-5"></div>
+          <div id="ag-kpis" class="kpi-row cols-4"></div>
           <div class="insights-section" id="ag-insights"></div>
-          <div style="display:flex;justify-content:flex-end;padding:0 28px 8px;">
+          <div style="display:flex;justify-content:flex-start;padding:0 28px 8px;">
             <div class="filter-group"><div class="filter-label">Grouped by</div><select class="filter-select" id="ag-group" onchange="renderAgents()" style="font-size:12px;padding:5px 24px 5px 10px;"><option value="weeks">Weeks</option><option value="days">Days</option><option value="months">Months</option></select></div>
           </div>
           <div class="charts-row">
-            <div class="chart-card"><div class="chart-title">Agent activity over time<div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#7B2CBF"></div>Found</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#16a34a"></div>Approved</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#dc2626"></div>Rejected</div></div></div><div class="chart-container"><canvas id="agents-activity-chart"></canvas></div></div>
-            <div class="chart-card"><div class="chart-title">Agent vs. manual quality<div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#7B2CBF"></div>Agent</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#DDD"></div>Manual</div></div></div><div class="chart-container"><canvas id="agents-quality-chart"></canvas></div></div>
+            <div class="chart-card full"><div class="chart-title">Agent activity over time<div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#16a34a"></div>Approved</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#F67E7D"></div>Rejected</div></div></div><div class="chart-container"><canvas id="agents-activity-chart"></canvas></div></div>
           </div>
-          <div class="table-section"><div class="table-header"><div class="table-title">Agent performance</div></div><table data-sort-table="ag"><thead><tr><th class="sortable" data-col="name">Agent</th><th class="sortable" data-col="owner">Owner</th><th class="sortable" data-col="status">Status</th><th class="sortable has-tip" data-col="found">Found<span class="tip-text">Profiles discovered by this agent.</span></th><th class="sortable has-tip" data-col="approvalRate">Approval Rate<span class="tip-text">% of agent-surfaced candidates approved by the recruiter during review.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to shortlist after approval.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied positively.</span></th><th class="sortable has-tip" data-col="iRate">Interested %<span class="tip-text">Interested ÷ contacted. Key measure of agent quality.</span></th></tr></thead><tbody id="ag-table-body"></tbody></table></div>
+          <div class="table-section"><div class="table-header"><div class="table-title">Agent performance</div></div><table data-sort-table="ag"><thead><tr><th class="sortable" data-col="name">Agent</th><th class="sortable" data-col="owner">Owner</th><th class="sortable" data-col="status">Status</th><th class="sortable has-tip" data-col="found">Found<span class="tip-text">Profiles discovered by this agent.</span></th><th class="sortable has-tip" data-col="approvalRate">Approval Rate<span class="tip-text">% of agent-surfaced candidates approved by the collaborator during review.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to shortlist after approval.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied positively.</span></th><th class="sortable has-tip" data-col="iRate">Interested %<span class="tip-text">Interested ÷ contacted. Key measure of agent quality.</span></th></tr></thead><tbody id="ag-table-body"></tbody></table></div>
         </div>
         <div class="state-empty hidden"><div class="empty-state"><svg viewBox="0 0 120 120" fill="none" stroke="#DDD" stroke-width="2"><circle cx="60" cy="40" r="20"/><path d="M40 90c0-11 9-20 20-20s20 9 20 20"/><path d="M52 36l4 4 8-8" stroke-width="3"/></svg><h3>No agent data yet</h3><p>Create an agent and let it source candidates automatically.</p><button class="cta-btn">Create your first agent</button></div></div>
       </div>
@@ -360,26 +357,26 @@ const PREV_MULT = { '7': 0.82, '30': 0.78, '90': 0.71, '365': 0.45 }; // prior p
 
 // Projects
 const PROJECTS = [
-  { name:'Senior Backend Engineer', user:'Sarah Kim',     status:'Active',    found:312, reviewed:245, shortlisted:68, contacted:52, replied:18, interested:9,  velocity:1.8 },
-  { name:'ML Engineer',             user:'Mike Chen',     status:'Active',    found:189, reviewed:156, shortlisted:42, contacted:38, replied:11, interested:6,  velocity:2.1 },
-  { name:'Product Designer',        user:'Rachel Torres', status:'Active',    found:156, reviewed:134, shortlisted:35, contacted:30, replied:8,  interested:4,  velocity:2.5 },
-  { name:'DevOps Lead',             user:'David Park',    status:'Active',    found:98,  reviewed:78,  shortlisted:22, contacted:18, replied:4,  interested:1,  velocity:3.2 },
-  { name:'Frontend Engineer',       user:'Emily Liu',     status:'Active',    found:267, reviewed:210, shortlisted:55, contacted:48, replied:14, interested:7,  velocity:1.6 },
-  { name:'Head of Data',            user:'Sarah Kim',     status:'Paused',    found:45,  reviewed:38,  shortlisted:12, contacted:8,  replied:2,  interested:0,  velocity:4.1 },
-  { name:'Solutions Engineer',      user:'James Wu',      status:'Active',    found:134, reviewed:112, shortlisted:28, contacted:24, replied:7,  interested:3,  velocity:2.8 },
-  { name:'Staff Engineer',          user:'Tom Nguyen',    status:'Completed', found:220, reviewed:195, shortlisted:51, contacted:44, replied:16, interested:8,  velocity:1.4 },
+  { name:'Senior Backend Engineer', users:['Sarah Kim','Mike Chen'],       status:'Active',    found:312, reviewed:245, shortlisted:68, contacted:52, replied:18, interested:9,  velocity:1.8 },
+  { name:'ML Engineer',             users:['Mike Chen'],                   status:'Active',    found:189, reviewed:156, shortlisted:42, contacted:38, replied:11, interested:6,  velocity:2.1 },
+  { name:'Product Designer',        users:['Rachel Torres','Emily Liu'],   status:'Active',    found:156, reviewed:134, shortlisted:35, contacted:30, replied:8,  interested:4,  velocity:2.5 },
+  { name:'DevOps Lead',             users:['David Park'],                  status:'Active',    found:98,  reviewed:78,  shortlisted:22, contacted:18, replied:4,  interested:1,  velocity:3.2 },
+  { name:'Frontend Engineer',       users:['Emily Liu'],                   status:'Active',    found:267, reviewed:210, shortlisted:55, contacted:48, replied:14, interested:7,  velocity:1.6 },
+  { name:'Head of Data',            users:['Sarah Kim','Tom Nguyen'],      status:'Paused',    found:45,  reviewed:38,  shortlisted:12, contacted:8,  replied:2,  interested:0,  velocity:4.1 },
+  { name:'Solutions Engineer',      users:['James Wu'],                    status:'Active',    found:134, reviewed:112, shortlisted:28, contacted:24, replied:7,  interested:3,  velocity:2.8 },
+  { name:'Staff Engineer',          users:['Tom Nguyen','Sarah Kim'],      status:'Completed', found:220, reviewed:195, shortlisted:51, contacted:44, replied:16, interested:8,  velocity:1.4 },
 ];
 
 // Sequences — each sequence can be used across multiple projects.
 // "runs" are the atomic unit: each run = one sequence sent to one candidate in one project via one channel.
 const SEQUENCE_DEFS = [
-  { name:'Warm Intro',          steps:4, owner:'Sarah Kim',     inbox:'sarah@acmetalent.com' },
-  { name:'Technical Deep Dive', steps:3, owner:'Mike Chen',     inbox:'mike@acmetalent.com' },
-  { name:'Culture-First',       steps:4, owner:'Emily Liu',     inbox:'emily@acmetalent.com' },
-  { name:'Agent Auto-Outreach', steps:3, owner:'David Park',    inbox:'david@acmetalent.com' },
-  { name:'Portfolio Ask',       steps:4, owner:'Rachel Torres', inbox:'rachel@acmetalent.com' },
-  { name:'Quick Connect',       steps:2, owner:'James Wu',      inbox:'james@acmetalent.com' },
-  { name:'Executive Reach',     steps:3, owner:'Tom Nguyen',    inbox:'tom@acmetalent.com' },
+  { name:'Warm Intro',          steps:4, owner:'Sarah Kim',     inbox:'sarah@boxedjuice.com' },
+  { name:'Technical Deep Dive', steps:3, owner:'Mike Chen',     inbox:'mike@boxedjuice.com' },
+  { name:'Culture-First',       steps:4, owner:'Emily Liu',     inbox:'emily@boxedjuice.com' },
+  { name:'Agent Auto-Outreach', steps:3, owner:'David Park',    inbox:'david@boxedjuice.com' },
+  { name:'Portfolio Ask',       steps:4, owner:'Rachel Torres', inbox:'rachel@boxedjuice.com' },
+  { name:'Quick Connect',       steps:2, owner:'James Wu',      inbox:'james@boxedjuice.com' },
+  { name:'Executive Reach',     steps:3, owner:'Tom Nguyen',    inbox:'tom@boxedjuice.com' },
 ];
 
 // Runs: sequence × project × channel — the raw data everything derives from
@@ -410,13 +407,13 @@ const OUTREACH_RUNS = [
 
 // Agents
 const AGENTS = [
-  { name:'Backend Eng Sourcer',       owner:'Sarah Kim',   status:'Active', found:456, approvalRate:78, shortlisted:356, contacted:210, interested:22 },
-  { name:'ML Talent Scout',           owner:'Mike Chen',   status:'Active', found:312, approvalRate:72, shortlisted:225, contacted:148, interested:16 },
-  { name:'Frontend Finder',           owner:'Emily Liu',   status:'Active', found:389, approvalRate:65, shortlisted:253, contacted:178, interested:14 },
-  { name:'DevOps Hunter',             owner:'David Park',  status:'Active', found:198, approvalRate:58, shortlisted:115, contacted:82,  interested:4 },
-  { name:'Design Talent Agent',       owner:'Rachel Torres',status:'Active',found:267, approvalRate:71, shortlisted:190, contacted:134, interested:11 },
-  { name:'Solutions Eng Recruiter',   owner:'James Wu',    status:'Paused', found:145, approvalRate:62, shortlisted:90,  contacted:56,  interested:3 },
-  { name:'Staff Eng Elite Search',    owner:'Tom Nguyen',  status:'Active', found:178, approvalRate:82, shortlisted:146, contacted:98,  interested:12 },
+  { name:'Backend Eng Sourcer',       owner:'Sarah Kim',    status:'Active', project:'Senior Backend Engineer', found:456, approvalRate:78, shortlisted:356, contacted:210, interested:22 },
+  { name:'ML Talent Scout',           owner:'Mike Chen',    status:'Active', project:'ML Engineer',             found:312, approvalRate:72, shortlisted:225, contacted:148, interested:16 },
+  { name:'Frontend Finder',           owner:'Emily Liu',    status:'Active', project:'Frontend Engineer',       found:389, approvalRate:65, shortlisted:253, contacted:178, interested:14 },
+  { name:'DevOps Hunter',             owner:'David Park',   status:'Active', project:'DevOps Lead',             found:198, approvalRate:58, shortlisted:115, contacted:82,  interested:4 },
+  { name:'Design Talent Agent',       owner:'Rachel Torres',status:'Active', project:'Product Designer',        found:267, approvalRate:71, shortlisted:190, contacted:134, interested:11 },
+  { name:'Solutions Eng Sourcer',     owner:'James Wu',     status:'Paused', project:'Solutions Engineer',      found:145, approvalRate:62, shortlisted:90,  contacted:56,  interested:3 },
+  { name:'Staff Eng Elite Search',    owner:'Tom Nguyen',   status:'Active', project:'Staff Engineer',          found:178, approvalRate:82, shortlisted:146, contacted:98,  interested:12 },
 ];
 
 // Per-user daily data for 90 days (Jan 1 – Mar 31). Everything derives from this.
@@ -559,7 +556,7 @@ const METRIC_TIPS = {
   'Avg. Interested Rate': 'Average interest rate across all filtered projects.',
   'Pipeline Candidates': 'Total candidates shortlisted across all filtered projects.',
   // Outreach
-  'Total Runs': 'Total outreach sequences initiated — both manually by recruiters and automatically by agents, across all channels.',
+  'Total Runs': 'Total outreach sequences initiated — both manually by collaborators and automatically by agents, across all channels.',
   'Open Rate': 'Percentage of sent messages that were opened. Applicable to email; not tracked for SMS or InMail.',
   'Click Rate': 'Percentage of sent messages where the recipient clicked a link.',
   'Reply Rate': 'Percentage of sent messages that received any reply, across all channels.',
@@ -567,10 +564,9 @@ const METRIC_TIPS = {
   // Agents
   'Profiles Found': 'Total candidate profiles discovered by agents matching your search criteria.',
   'Approval Rate': 'Percentage of agent-recommended profiles that were approved during calibration review.',
-  'Avg. Calibration Rounds': 'Average number of feedback rounds before the agent consistently matches your preferences.',
   'Agent Interested Rate': 'Interest rate for candidates sourced by agents, compared to manually sourced candidates.',
   // Table headers
-  'Searches': 'Total AI-powered searches run by this recruiter.',
+  'Searches': 'Total AI-powered searches run by this collaborator.',
   'Reviewed': 'Candidate profiles viewed in detail.',
   'Shortlisted': 'Candidates added to a project shortlist.',
   'Contacted': 'Candidates who received outreach.',
@@ -596,7 +592,7 @@ function tip(label) {
 }
 
 function kpi(label, value, prev, unit='', pp=false) {
-  const pct = pp ? (value - prev).toFixed(1) + 'pp' : prev > 0 ? ((value/prev-1)*100).toFixed(0) + '%' : '—';
+  const pct = pp ? (parseFloat(value) - parseFloat(prev)).toFixed(1) + 'pp' : prev > 0 ? ((value/prev-1)*100).toFixed(0) + '%' : '—';
   const dir = value >= prev ? 'up' : 'down';
   const sign = value >= prev ? '+' : '';
   const isOutcome = ['Interested Replies','Candidates Contacted','Interest Rate','Candidates Exported to ATS'].includes(label);
@@ -620,8 +616,17 @@ let agSortCol = 'found', agSortDir = 'desc';
 // ══════════════════════════════════════
 // INSIGHTS ENGINE
 // ══════════════════════════════════════
-function renderInsight(icon, type, title, desc) {
-  return `<div class="insight-card"><div class="insight-icon ${type}">${icon}</div><div class="insight-body"><div class="insight-title">${title}</div><div class="insight-desc">${desc}</div></div></div>`;
+function renderInsight(icon, type, title, desc, cta) {
+  return `<div class="insight-card"><div class="insight-icon ${type}">${icon}</div><div class="insight-body"><div class="insight-title">${title}</div><div class="insight-desc">${desc}</div>${cta ? `<a class="insight-cta">${cta} →</a>` : ''}</div><button class="insight-dismiss" onclick="this.closest('.insight-card').remove();updateInsightCount(this)" title="Dismiss">×</button></div>`;
+}
+
+function updateInsightCount(el) {
+  const section = el.closest('.insights-section');
+  if (!section) return;
+  const remaining = section.querySelectorAll('.insight-card').length;
+  const badge = section.querySelector('.badge');
+  if (remaining === 0) section.innerHTML = '';
+  else if (badge) badge.textContent = remaining;
 }
 
 function renderInsightsBlock(containerId, insights) {
@@ -650,17 +655,7 @@ function renderUsage() {
   document.getElementById('usage-kpis-outcome').innerHTML =
     kpi('Interested Replies', interested, prevInterested) +
     kpi('Candidates Contacted', contacted, prevContacted) +
-    kpi('Interest Rate', rate.toFixed(1)+'%', prevRate.toFixed(1), '', true) +
-    kpi('Candidates Exported to ATS', exported, prevExported);
-
-  const activeUsers = users.filter(u => USER_DATA[u].searches > 5).length;
-  const prevActiveUsers = Math.max(1, activeUsers - (userFilter==='all'?1:0));
-  document.getElementById('usage-kpis-activity').innerHTML =
-    `<div class="kpi-card"><div class="kpi-label has-tip">Active Users${tip('Active Users')}</div><div class="kpi-value">${activeUsers}<span style="font-size:14px;color:#999;font-weight:400"> / ${users.length}</span></div><div class="kpi-change up" title="vs prior period">+${activeUsers-prevActiveUsers} <span class="kpi-prev">from ${prevActiveUsers}</span></div></div>` +
-    kpi('Searches Run', tot('searches'), prev('searches')) +
-    kpi('Profiles Reviewed', tot('reviewed'), prev('reviewed')) +
-    kpi('Contacts Revealed', tot('contacts'), prev('contacts')) +
-    `<div class="kpi-card"><div class="kpi-label has-tip">Agents Active${tip('Agents Active')}</div><div class="kpi-value">${sumField(data,'agentsActive')}</div></div>`;
+    kpi('Interest Rate', rate.toFixed(1)+'%', prevRate.toFixed(1), '', true);
 
   // Plan usage section
   const totalContacts = sumField(data, 'contacts');
@@ -693,73 +688,60 @@ function renderUsage() {
       <div class="plan-detail">${daysRemaining} days remaining</div>
     </div>`;
 
-  // Usage insights
+  // Usage insights — only shown when there's an actionable next step in-product
   const usageInsights = [];
-  if (userFilter === 'all' && users.length > 2) {
-    const perfs = users.map(u => {
-      const d = USER_DATA[u];
-      const cont = Math.round(d.contacted * dateMult);
-      const intr = Math.round(d.interested * dateMult);
-      return { name: u, contacted: cont, interested: intr, rate: cont > 0 ? intr/cont*100 : 0, searches: Math.round(d.searches * dateMult), reviewed: Math.round(d.reviewed * dateMult), contacts: Math.round(d.contacts * dateMult) };
-    }).filter(p => p.contacted >= 5);
 
-    const best = perfs.reduce((a,b) => a.rate > b.rate ? a : b, perfs[0]);
-    const worst = perfs.reduce((a,b) => a.rate < b.rate ? a : b, perfs[0]);
-    if (best && worst && best.name !== worst.name && best.rate - worst.rate > 3) {
-      usageInsights.push(renderInsight('↑', 'positive',
-        `${best.name} is converting at ${best.rate.toFixed(1)}% — ${(best.rate / worst.rate).toFixed(1)}x higher than ${worst.name}`,
-        `Consider having <strong>${best.name}</strong> share their search criteria and outreach templates with the team. Their approach could lift the team average from ${rate.toFixed(1)}% to closer to ${(rate + (best.rate - rate) * 0.3).toFixed(1)}%.`
-      ));
-    }
+  // High credit burn per interested reply — action: refine search criteria
+  const creditsPerInterested = interested > 0 ? Math.round(totalContacts / interested) : 0;
+  if (creditsPerInterested > 15) {
+    usageInsights.push(renderInsight('$', 'action',
+      `${creditsPerInterested} contact credits per interested reply — shortlisting first could cut this by 30-50%`,
+      `Credits are being used on candidates who don't convert. Shortlisting candidates before revealing contacts ensures you're only spending credits on strong-fit profiles.`,
+      'Review shortlist settings'
+    ));
+  }
 
-    const lowActivity = perfs.filter(p => p.searches < 15 && p.contacted < 10);
-    if (lowActivity.length > 0) {
-      const names = lowActivity.map(p => p.name).join(', ');
+  // Funnel drop-off — action: tighten search filters
+  const reviewed = tot('reviewed');
+  const shortlisted = tot('shortlisted');
+  if (reviewed > 50 && shortlisted / reviewed < 0.15) {
+    usageInsights.push(renderInsight('⚡', 'action',
+      `Only ${(shortlisted/reviewed*100).toFixed(0)}% of reviewed profiles are being shortlisted — search criteria may be too broad`,
+      `${reviewed.toLocaleString()} profiles reviewed but only ${shortlisted} shortlisted. Tighter must-have filters would surface fewer, better-matched candidates and reduce time spent reviewing.`,
+      'Edit search filters'
+    ));
+  }
+
+  // Low seat utilization — action: manage team seats
+  if (userFilter === 'all') {
+    const activeCount = users.filter(u => USER_DATA[u].searches > 5).length;
+    const inactiveCount = users.length - activeCount;
+    if (inactiveCount > 0) {
       usageInsights.push(renderInsight('!', 'warning',
-        `${lowActivity.length === 1 ? names + ' has' : names + ' have'} low search and outreach activity`,
-        `Fewer than 15 searches and 10 contacts this period. This may indicate onboarding friction, competing priorities, or the need for search calibration help.`
+        `${inactiveCount} of ${users.length} seats have low activity this period`,
+        `Inactive seats cost the same as active ones. Reassigning or deactivating unused seats saves <strong>$${inactiveCount * 199}/mo</strong>.`,
+        'Manage team seats'
       ));
-    }
-
-    const creditPerfs = perfs.filter(p => p.contacts > 10 && p.interested > 0);
-    if (creditPerfs.length >= 2) {
-      const bestCred = creditPerfs.reduce((a,b) => (a.contacts/a.interested) < (b.contacts/b.interested) ? a : b);
-      const worstCred = creditPerfs.reduce((a,b) => (a.contacts/a.interested) > (b.contacts/b.interested) ? a : b);
-      if (bestCred.name !== worstCred.name) {
-        const bestRatio = Math.round(bestCred.contacts / bestCred.interested);
-        const worstRatio = Math.round(worstCred.contacts / worstCred.interested);
-        if (worstRatio > bestRatio * 2) {
-          usageInsights.push(renderInsight('$', 'action',
-            `Credit efficiency varies ${(worstRatio/bestRatio).toFixed(1)}x across the team`,
-            `<strong>${bestCred.name}</strong> uses ${bestRatio} contact credits per interested reply vs. <strong>${worstCred.name}</strong> at ${worstRatio}. Reviewing ${worstCred.name}'s targeting criteria could save <strong>${Math.round((worstRatio - bestRatio) * worstCred.interested)} credits</strong> per period.`
-          ));
-        }
-      }
     }
   }
+
+  // Credit pacing — action: upgrade plan or adjust usage
   if (projectedContacts > contactLimit) {
     usageInsights.push(renderInsight('!', 'warning',
       `On pace to exceed contact credit limit by ${Math.round(projectedContacts - contactLimit).toLocaleString()} credits`,
-      `At current burn rate, you'll hit the ${contactLimit.toLocaleString()} limit with ${daysRemaining} days left. Consider upgrading or prioritizing higher-signal candidates before revealing contacts.`
+      `You'll hit the ${contactLimit.toLocaleString()} limit with ${daysRemaining} days left in the billing period.`,
+      'Upgrade plan'
     ));
   }
   renderInsightsBlock('usage-insights', usageInsights);
 
   // Charts
-  const grouping = document.getElementById('usage-group').value;
   const dateRange = document.getElementById('usage-date').value;
-  const tsContacts = sumTimeSeriesForUsers(users, 'contacts', dateRange, grouping);
-  const tsExports = sumTimeSeriesForUsers(users, 'exports', dateRange, grouping);
+  const grouping = 'weeks';
   const tsSearches = sumTimeSeriesForUsers(users, 'searches', dateRange, grouping);
   const tsReviewed = sumTimeSeriesForUsers(users, 'reviewed', dateRange, grouping);
   const tsShortlisted = sumTimeSeriesForUsers(users, 'shortlisted', dateRange, grouping);
   const tsContacted = sumTimeSeriesForUsers(users, 'contacted', dateRange, grouping);
-
-  destroyChart('usage-credits-chart');
-  charts['usage-credits-chart'] = new Chart(document.getElementById('usage-credits-chart'), { type:'bar', data:{ labels:tsContacts.labels, datasets:[{ data:tsContacts.data, backgroundColor:P, borderRadius:4, barPercentage:0.65 }] }, options:chartOpts });
-
-  destroyChart('usage-exports-chart');
-  charts['usage-exports-chart'] = new Chart(document.getElementById('usage-exports-chart'), { type:'bar', data:{ labels:tsExports.labels, datasets:[{ data:tsExports.data, backgroundColor:LP, borderRadius:4, barPercentage:0.65 }] }, options:chartOpts });
 
   const smallPt = tsSearches.data.length > 30 ? 0 : 4;
   destroyChart('usage-activity-chart');
@@ -795,12 +777,20 @@ function renderProjects() {
   const userFilter = document.getElementById('proj-user').value;
   const statusFilter = document.getElementById('proj-status').value;
   const projectFilter = document.getElementById('proj-project').value;
-  let filtered = PROJECTS.filter(p => (userFilter==='all' || p.user===userFilter) && (statusFilter==='all' || p.status===statusFilter) && (projectFilter==='all' || p.name===projectFilter));
+  const projDateMult = DATE_MULT[document.getElementById('proj-date').value] || 1;
+  let filtered = PROJECTS.filter(p => (userFilter==='all' || p.users.includes(userFilter)) && (statusFilter==='all' || p.status===statusFilter) && (projectFilter==='all' || p.name===projectFilter));
+
+  // Scale numeric fields by date range
+  const scaleFields = ['found','reviewed','shortlisted','contacted','replied','interested'];
+  filtered = filtered.map(p => {
+    const scaled = { ...p };
+    scaleFields.forEach(f => scaled[f] = Math.round(p[f] * projDateMult));
+    return scaled;
+  });
 
   const active = filtered.filter(p=>p.status==='Active').length;
   const paused = filtered.filter(p=>p.status==='Paused').length;
   const completed = filtered.filter(p=>p.status==='Completed').length;
-  const avgVelocity = filtered.length > 0 ? (filtered.reduce((s,p)=>s+p.velocity,0)/filtered.length).toFixed(1) : '—';
   const totContacted = sumField(filtered,'contacted');
   const totInterested = sumField(filtered,'interested');
   const avgRate = totContacted > 0 ? (totInterested/totContacted*100).toFixed(1) : '0.0';
@@ -815,10 +805,10 @@ function renderProjects() {
 
   const funnelData = ['found','reviewed','shortlisted','contacted','replied','interested'].map(f => sumField(filtered, f));
   destroyChart('projects-funnel-chart');
-  charts['projects-funnel-chart'] = new Chart(document.getElementById('projects-funnel-chart'), { type:'bar', data:{ labels:['Found','Reviewed','Shortlisted','Contacted','Replied','Interested'], datasets:[{ data:funnelData, backgroundColor:['rgba(123,44,191,0.15)','rgba(123,44,191,0.28)','rgba(123,44,191,0.42)','rgba(123,44,191,0.58)','rgba(123,44,191,0.78)',P], borderRadius:6, barPercentage:0.7 }] }, options:{...chartOpts, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex; const pct=i>0?((funnelData[i]/funnelData[i-1])*100).toFixed(1)+'% conversion':'100%'; return `${ctx.parsed.y.toLocaleString()} (${pct})`;}}}}} });
+  charts['projects-funnel-chart'] = new Chart(document.getElementById('projects-funnel-chart'), { type:'bar', data:{ labels:['Found','Reviewed','Shortlisted','Contacted','Replied','Interested'], datasets:[{ data:funnelData, backgroundColor:['rgba(123,44,191,0.15)','rgba(123,44,191,0.28)','rgba(123,44,191,0.42)','rgba(123,44,191,0.58)','rgba(123,44,191,0.78)',P], borderRadius:6, barPercentage:0.7 }] }, options:{...chartOpts, layout:{padding:{top:16}}, scales:{...chartOpts.scales, y:{...chartOpts.scales.y, grace:'10%'}}, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex; const pct=i>0?((funnelData[i]/funnelData[i-1])*100).toFixed(1)+'% conversion':'100%'; return `${ctx.parsed.y.toLocaleString()} (${pct})`;}}}}} });
 
   const projRows = filtered.map(p => ({
-    ...p, iRate: p.contacted > 0 ? +(p.interested/p.contacted*100).toFixed(1) : 0
+    ...p, user: p.users.join(', '), iRate: p.contacted > 0 ? +(p.interested/p.contacted*100).toFixed(1) : 0
   }));
   projRows.sort((a,b) => {
     const av = a[projSortCol], bv = b[projSortCol];
@@ -826,45 +816,46 @@ function renderProjects() {
     return projSortDir==='desc' ? bv-av : av-bv;
   });
   document.getElementById('proj-table-body').innerHTML = projRows.map(p =>
-    `<tr><td style="font-weight:600">${p.name}</td><td>${p.user}</td><td>${statusBadge(p.status)}</td><td>${p.found}</td><td>${p.reviewed}</td><td>${p.shortlisted}</td><td>${p.contacted}</td><td>${p.replied}</td><td>${p.interested}</td><td style="font-weight:600;color:#333">${p.iRate}%</td></tr>`
+    `<tr><td style="font-weight:600">${p.name}</td><td>${p.users.join(', ')}</td><td>${statusBadge(p.status)}</td><td>${p.found}</td><td>${p.reviewed}</td><td>${p.shortlisted}</td><td>${p.contacted}</td><td>${p.replied}</td><td>${p.interested}</td><td style="font-weight:600;color:#333">${p.iRate}%</td></tr>`
   ).join('');
 
-  // Project insights
+  // Project insights — only actionable, each with an in-product CTA
   const projInsights = [];
   const activeProjs = projRows.filter(p => p.status === 'Active');
 
-  // Bottleneck detection: lots found but few contacted
-  activeProjs.forEach(p => {
-    if (p.found > 100 && p.contacted < p.found * 0.15) {
-      projInsights.push(renderInsight('⚡', 'action',
-        `${p.name} has a review bottleneck`,
-        `<strong>${p.found}</strong> candidates found but only <strong>${p.contacted}</strong> contacted (${(p.contacted/p.found*100).toFixed(0)}%). ${p.user} may need help reviewing the backlog, or the search criteria could be tightened to surface higher-signal candidates.`
-      ));
-    }
-  });
-
-  // Top performing project
-  const ratedProjs = activeProjs.filter(p => p.contacted >= 10);
-  if (ratedProjs.length >= 2) {
-    const bestProj = ratedProjs.reduce((a,b) => a.iRate > b.iRate ? a : b);
-    const avgRate = ratedProjs.reduce((s,p) => s+p.iRate, 0) / ratedProjs.length;
-    if (bestProj.iRate > avgRate * 1.3) {
-      projInsights.push(renderInsight('★', 'positive',
-        `${bestProj.name} is outperforming at ${bestProj.iRate}% interest rate`,
-        `${(bestProj.iRate / avgRate).toFixed(1)}x the project average of ${avgRate.toFixed(1)}%. ${bestProj.user}'s search and outreach strategy on this role could be a template for other projects.`
-      ));
-    }
+  // Review bottleneck — action: add agent or tighten criteria
+  const bottlenecked = activeProjs.filter(p => p.found > 100 && p.contacted < p.found * 0.15);
+  if (bottlenecked.length > 0) {
+    const names = bottlenecked.map(p => p.name).slice(0,2).join(', ');
+    projInsights.push(renderInsight('⚡', 'action',
+      `${bottlenecked.length} project${bottlenecked.length>1?'s':''} sourcing faster than reviewing — candidates are piling up`,
+      `${names}${bottlenecked.length>2?' and '+(bottlenecked.length-2)+' more':''}: candidates found but not yet contacted. An agent can auto-shortlist high-confidence matches to clear the backlog.`,
+      'Add an agent'
+    ));
   }
 
-  // Stalled project: no interested replies
-  activeProjs.forEach(p => {
-    if (p.contacted >= 15 && p.interested === 0) {
-      projInsights.push(renderInsight('!', 'warning',
-        `${p.name} has ${p.contacted} contacts but zero interested replies`,
-        `This role may need a different sourcing approach. Consider reviewing the candidate criteria, adjusting the outreach sequence, or pausing to recalibrate with the hiring manager.`
-      ));
-    }
-  });
+  // Agent coverage gap — only show for projects that don't already have an agent
+  const agentProjects = new Set(AGENTS.filter(a => a.status === 'Active').map(a => a.project));
+  const uncoveredProjs = activeProjs.filter(p => !agentProjects.has(p.name));
+  if (uncoveredProjs.length > 0) {
+    const names = uncoveredProjs.map(p => p.name).slice(0, 3).join(', ');
+    projInsights.push(renderInsight('⚙', 'action',
+      `${uncoveredProjs.length} active project${uncoveredProjs.length>1?'s':''} without an agent: ${names}`,
+      `These roles have no agent sourcing candidates in the background. Adding an agent means candidates are being found 24/7 while your team focuses on outreach.`,
+      'Create new agent'
+    ));
+  }
+
+  // Stalled projects — action: edit search criteria or change sequence
+  const stalled = activeProjs.filter(p => p.contacted >= 15 && p.interested === 0);
+  if (stalled.length > 0) {
+    const stalledNames = stalled.map(p => p.name).join(', ');
+    projInsights.push(renderInsight('!', 'warning',
+      `${stalledNames}: ${stalled.reduce((s,p)=>s+p.contacted,0)} contacts sent, zero interested`,
+      `Outreach isn't resonating. Try swapping to a different sequence template, or recalibrate the search criteria to target a different candidate profile.`,
+      'Edit search criteria'
+    ));
+  }
 
   renderInsightsBlock('proj-insights', projInsights);
 }
@@ -878,7 +869,6 @@ function updateOutreachFilters() {
   const seqFilter = document.getElementById('out-seq').value;
   const projFilter = document.getElementById('out-proj').value;
   const channelFilter = document.getElementById('out-channel').value;
-  const inboxFilter = document.getElementById('out-inbox').value;
 
   // Get runs matching current global filter (user) to determine available options
   let baseRuns = OUTREACH_RUNS;
@@ -900,18 +890,14 @@ function updateOutreachFilters() {
   }
 
   // Each filter considers the others
-  const runsForSeqOpts = baseRuns.filter(r => (projFilter==='all'||r.project===projFilter) && (channelFilter==='all'||r.channel===channelFilter) && (inboxFilter==='all'||SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox===inboxFilter));
+  const runsForSeqOpts = baseRuns.filter(r => (projFilter==='all'||r.project===projFilter) && (channelFilter==='all'||r.channel===channelFilter));
   rebuildSelect('out-seq', seqFilter, () => [...new Set(runsForSeqOpts.map(r => r.seq))].sort());
 
-  const runsForProjOpts = baseRuns.filter(r => (seqFilter==='all'||r.seq===seqFilter) && (channelFilter==='all'||r.channel===channelFilter) && (inboxFilter==='all'||SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox===inboxFilter));
+  const runsForProjOpts = baseRuns.filter(r => (seqFilter==='all'||r.seq===seqFilter) && (channelFilter==='all'||r.channel===channelFilter));
   rebuildSelect('out-proj', projFilter, () => [...new Set(runsForProjOpts.map(r => r.project))].sort());
 
-  const runsForChannelOpts = baseRuns.filter(r => (seqFilter==='all'||r.seq===seqFilter) && (projFilter==='all'||r.project===projFilter) && (inboxFilter==='all'||SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox===inboxFilter));
+  const runsForChannelOpts = baseRuns.filter(r => (seqFilter==='all'||r.seq===seqFilter) && (projFilter==='all'||r.project===projFilter));
   rebuildSelect('out-channel', channelFilter, () => [...new Set(runsForChannelOpts.map(r => r.channel))].sort());
-
-  const runsForInboxOpts = baseRuns.filter(r => (seqFilter==='all'||r.seq===seqFilter) && (projFilter==='all'||r.project===projFilter) && (channelFilter==='all'||r.channel===channelFilter));
-  const inboxes = [...new Set(runsForInboxOpts.map(r => SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox).filter(Boolean))].sort();
-  rebuildSelect('out-inbox', inboxFilter, () => inboxes);
 }
 
 function getFilteredRuns() {
@@ -919,14 +905,12 @@ function getFilteredRuns() {
   const seqFilter = document.getElementById('out-seq').value;
   const projFilter = document.getElementById('out-proj').value;
   const channelFilter = document.getElementById('out-channel').value;
-  const inboxFilter = document.getElementById('out-inbox').value;
 
   return OUTREACH_RUNS.filter(r =>
     (userFilter==='all' || r.user===userFilter) &&
     (seqFilter==='all' || r.seq===seqFilter) &&
     (projFilter==='all' || r.project===projFilter) &&
-    (channelFilter==='all' || r.channel===channelFilter) &&
-    (inboxFilter==='all' || SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox===inboxFilter)
+    (channelFilter==='all' || r.channel===channelFilter)
   );
 }
 
@@ -936,7 +920,16 @@ function renderOutreach() {
   // Update cascading filters first
   updateOutreachFilters();
 
-  const filtered = getFilteredRuns();
+  const outDateMult = DATE_MULT[document.getElementById('out-date').value] || 1;
+  const rawFiltered = getFilteredRuns();
+
+  // Scale run metrics by date range
+  const numFields = ['total','active','opened','clicked','replied','interested','bounced'];
+  const filtered = rawFiltered.map(r => {
+    const scaled = { ...r };
+    numFields.forEach(f => scaled[f] = Math.round(r[f] * outDateMult));
+    return scaled;
+  });
 
   const total = sumField(filtered,'total');
   const opened = sumField(filtered,'opened');
@@ -946,28 +939,28 @@ function renderOutreach() {
   const bounced = sumField(filtered,'bounced');
   const pct = (n) => total > 0 ? (n/total*100).toFixed(1) : '0.0';
 
-  // Determine if filtered runs include any email — open/click only apply to email
-  const channels = new Set(filtered.map(r => r.channel));
-  const hasEmail = channels.has('email');
-  const emailOnly = channels.size === 1 && hasEmail;
-  const noEmail = !hasEmail;
-  // For open/click, compute against email runs only (those are the only ones that track it)
-  const emailRuns = filtered.filter(r => r.channel === 'email');
-  const emailTotal = sumField(emailRuns, 'total');
-  const pctEmail = (n) => emailTotal > 0 ? (n/emailTotal*100).toFixed(1) : '0.0';
-
-  const openVal = noEmail ? 'N/A' : `${pctEmail(sumField(emailRuns,'opened'))}%`;
-  const openSub = noEmail ? 'Not tracked for this channel' : emailOnly ? `(${sumField(emailRuns,'opened')}/${emailTotal})` : `(${sumField(emailRuns,'opened')}/${emailTotal} email only)`;
-  const clickVal = noEmail ? 'N/A' : `${pctEmail(sumField(emailRuns,'clicked'))}%`;
-  const clickSub = noEmail ? 'Not tracked for this channel' : emailOnly ? `(${sumField(emailRuns,'clicked')}/${emailTotal})` : `(${sumField(emailRuns,'clicked')}/${emailTotal} email only)`;
-
   document.getElementById('out-kpis').innerHTML =
     `<div class="kpi-card"><div class="kpi-label has-tip">Total Runs${tip('Total Runs')}</div><div class="kpi-value">${total.toLocaleString()}</div></div>` +
-    `<div class="kpi-card"><div class="kpi-label has-tip">Open Rate${tip('Open Rate')}</div><div class="kpi-value">${openVal}</div><div class="kpi-sub">${openSub}</div></div>` +
-    `<div class="kpi-card"><div class="kpi-label has-tip">Click Rate${tip('Click Rate')}</div><div class="kpi-value">${clickVal}</div><div class="kpi-sub">${clickSub}</div></div>` +
     `<div class="kpi-card"><div class="kpi-label has-tip">Reply Rate${tip('Reply Rate')}</div><div class="kpi-value">${pct(replied)}%</div><div class="kpi-sub">(${replied}/${total})</div></div>` +
-    `<div class="kpi-card"><div class="kpi-label has-tip">Interest Rate${tip('Interest Rate')}</div><div class="kpi-value">${pct(interested)}%</div><div class="kpi-sub">(${interested}/${total})</div></div>` +
-    `<div class="kpi-card"><div class="kpi-label has-tip">Bounce Rate${tip('Bounce Rate')}</div><div class="kpi-value">${pct(bounced)}%</div><div class="kpi-sub">(${bounced}/${total})</div></div>`;
+    `<div class="kpi-card"><div class="kpi-label has-tip">Interest Rate${tip('Interest Rate')}</div><div class="kpi-value">${pct(interested)}%</div><div class="kpi-sub">(${interested}/${total})</div></div>`;
+
+  // Channel breakdown — per-channel reply rate and interest rate
+  const channelSet = [...new Set(filtered.map(r => r.channel))].sort();
+  if (channelSet.length > 0) {
+    const channelPills = channelSet.map(ch => {
+      const chRuns = filtered.filter(r => r.channel === ch);
+      const chTotal = sumField(chRuns, 'total');
+      const chReplied = sumField(chRuns, 'replied');
+      const chInterested = sumField(chRuns, 'interested');
+      const chReplyRate = chTotal > 0 ? (chReplied/chTotal*100).toFixed(1) : '0.0';
+      const chIntRate = chTotal > 0 ? (chInterested/chTotal*100).toFixed(1) : '0.0';
+      const label = ch.charAt(0).toUpperCase() + ch.slice(1);
+      return `<span style="display:inline-flex;align-items:center;gap:4px;"><span class="ch-badge ${ch}" style="font-size:11px;padding:2px 8px;">${label}</span><span style="font-size:12px;color:#555;">${chReplyRate}% reply, ${chIntRate}% interest</span></span>`;
+    }).join('<span style="color:#DDD;margin:0 8px;">|</span>');
+    document.getElementById('out-channel-breakdown').innerHTML = `<span style="font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.3px;margin-right:8px;">Channel breakdown</span>${channelPills}`;
+  } else {
+    document.getElementById('out-channel-breakdown').innerHTML = '';
+  }
 
   // Charts — scale time series based on filtered proportion
   const outGrouping = document.getElementById('out-group').value;
@@ -1010,46 +1003,48 @@ function renderOutreach() {
   outPage = 0;
   renderOutreachTable();
 
-  // Outreach insights
+  // Outreach insights — only actionable, each with in-product CTA
   const outInsights = [];
   const seqRows = window._outreachSeqRows || [];
   const seqsWithVolume = seqRows.filter(s => s.total >= 20);
 
   if (seqsWithVolume.length >= 2) {
-    // Best and worst sequences by interest rate
+    // Low-performing sequence — action: edit the sequence
     const rates = seqsWithVolume.map(s => ({ ...s, intRate: s.total > 0 ? s.interested/s.total*100 : 0 }));
     const bestSeq = rates.reduce((a,b) => a.intRate > b.intRate ? a : b);
     const worstSeq = rates.reduce((a,b) => a.intRate < b.intRate ? a : b);
     if (bestSeq.seq !== worstSeq.seq && bestSeq.intRate > worstSeq.intRate * 1.5) {
-      outInsights.push(renderInsight('↑', 'positive',
-        `"${bestSeq.seq}" converts ${(bestSeq.intRate / worstSeq.intRate).toFixed(1)}x better than "${worstSeq.seq}"`,
-        `${bestSeq.intRate.toFixed(1)}% vs ${worstSeq.intRate.toFixed(1)}% interest rate. If "${worstSeq.seq}" matched "${bestSeq.seq}"'s conversion, that's <strong>~${Math.round((bestSeq.intRate - worstSeq.intRate) / 100 * worstSeq.total)} more interested replies</strong> from existing volume.`
+      const liftOpportunity = Math.round((bestSeq.intRate - worstSeq.intRate) / 100 * worstSeq.total);
+      outInsights.push(renderInsight('⚡', 'action',
+        `"${worstSeq.seq}" converts at ${worstSeq.intRate.toFixed(1)}% — ${(bestSeq.intRate / worstSeq.intRate).toFixed(1)}x lower than your best sequence`,
+        `Rewriting this sequence's messaging to match "${bestSeq.seq}"'s approach could yield <strong>~${liftOpportunity} more interested replies</strong> from existing volume.`,
+        'Edit sequence'
       ));
     }
 
-    // High bounce rate
-    const highBounce = seqsWithVolume.filter(s => s.total > 0 && s.bounced/s.total > 0.05);
-    if (highBounce.length > 0) {
-      const worst = highBounce.reduce((a,b) => b.bounced/b.total > a.bounced/a.total ? b : a);
+    // Bounce rate — action: enable email verification
+    const totalBounced = seqsWithVolume.reduce((s,sq) => s+sq.bounced, 0);
+    const totalSent = seqsWithVolume.reduce((s,sq) => s+sq.total, 0);
+    const overallBounceRate = totalSent > 0 ? totalBounced/totalSent*100 : 0;
+    if (overallBounceRate > 3) {
       outInsights.push(renderInsight('!', 'warning',
-        `"${worst.seq}" has a ${(worst.bounced/worst.total*100).toFixed(1)}% bounce rate`,
-        `${worst.bounced} of ${worst.total} messages bounced. This hurts sender reputation and wastes credits. Check that contact data is fresh before sending — consider enabling email verification if available.`
+        `${overallBounceRate.toFixed(1)}% bounce rate is damaging your sender reputation`,
+        `Bounces above 3% risk emails landing in spam. Enable email verification to validate addresses before sending.`,
+        'Enable email verification'
       ));
     }
   }
 
-  // LinkedIn opportunity
-  const linkedinRuns = filtered.filter(r => r.channel === 'linkedin');
-  const emailRuns = filtered.filter(r => r.channel === 'email');
-  if (linkedinRuns.length > 0 && emailRuns.length > 0) {
-    const liReplyRate = sumField(linkedinRuns,'total') > 0 ? sumField(linkedinRuns,'replied')/sumField(linkedinRuns,'total')*100 : 0;
-    const emReplyRate = sumField(emailRuns,'total') > 0 ? sumField(emailRuns,'replied')/sumField(emailRuns,'total')*100 : 0;
-    if (liReplyRate > emReplyRate * 1.2) {
-      outInsights.push(renderInsight('💬', 'action',
-        `LinkedIn InMail reply rate is ${(liReplyRate/emReplyRate).toFixed(1)}x higher than email`,
-        `${liReplyRate.toFixed(1)}% vs ${emReplyRate.toFixed(1)}%. Consider expanding LinkedIn outreach to more sequences — only ${[...new Set(linkedinRuns.map(r=>r.seq))].length} of ${seqRows.length} sequences currently use it.`
-      ));
-    }
+  // Multi-channel — action: add LinkedIn step to a sequence
+  const liRuns = filtered.filter(r => r.channel === 'linkedin');
+  const emRuns = filtered.filter(r => r.channel === 'email');
+  const emailOnlySeqs = seqRows.filter(s => s.channels.has('email') && !s.channels.has('linkedin'));
+  if (emailOnlySeqs.length > 0) {
+    outInsights.push(renderInsight('→', 'action',
+      `${emailOnlySeqs.length} sequence${emailOnlySeqs.length>1?'s are':' is'} email-only — adding LinkedIn could boost reply rates 20-40%`,
+      `Multi-channel sequences consistently outperform single-channel. Add a LinkedIn step to "${emailOnlySeqs[0].seq}" to test the impact.`,
+      'Edit sequence'
+    ));
   }
 
   renderInsightsBlock('out-insights', outInsights);
@@ -1156,11 +1151,20 @@ function renderAgents() {
   const ownerFilter = document.getElementById('ag-owner').value;
   const agentFilter = document.getElementById('ag-agent').value;
   const statusFilter = document.getElementById('ag-status').value;
+  const agDateMult = DATE_MULT[document.getElementById('ag-date').value] || 1;
   let filtered = AGENTS.filter(a =>
     (ownerFilter==='all' || a.owner===ownerFilter) &&
     (agentFilter==='all' || a.name===agentFilter) &&
     (statusFilter==='all' || a.status===statusFilter)
   );
+
+  // Scale numeric fields by date range (approval rate stays as-is — it's a %)
+  const agScaleFields = ['found','shortlisted','contacted','interested'];
+  filtered = filtered.map(a => {
+    const scaled = { ...a };
+    agScaleFields.forEach(f => scaled[f] = Math.round(a[f] * agDateMult));
+    return scaled;
+  });
 
   const totalFound = sumField(filtered,'found');
   const totalShortlisted = sumField(filtered,'shortlisted');
@@ -1173,8 +1177,7 @@ function renderAgents() {
     `<div class="kpi-card"><div class="kpi-label has-tip">Active Agents${tip('Agents Active')}</div><div class="kpi-value">${filtered.filter(a=>a.status==='Active').length}</div><div class="kpi-sub">${filtered.filter(a=>a.status==='Paused').length} paused</div></div>` +
     `<div class="kpi-card"><div class="kpi-label has-tip">Profiles Found${tip('Profiles Found')}</div><div class="kpi-value">${totalFound.toLocaleString()}</div></div>` +
     `<div class="kpi-card"><div class="kpi-label has-tip">Approval Rate${tip('Approval Rate')}</div><div class="kpi-value">${avgApproval}%</div></div>` +
-    `<div class="kpi-card"><div class="kpi-label has-tip">Avg. Calibration Rounds${tip('Avg. Calibration Rounds')}</div><div class="kpi-value">2.1</div></div>` +
-    `<div class="kpi-card"><div class="kpi-label has-tip">Agent Interested Rate${tip('Agent Interested Rate')}</div><div class="kpi-value">${intRate}%</div><div class="kpi-sub">vs 7.8% manual</div></div>`;
+    `<div class="kpi-card"><div class="kpi-label has-tip">Agent Interested Rate${tip('Agent Interested Rate')}</div><div class="kpi-value">${intRate}%</div></div>`;
 
   const agGrouping = document.getElementById('ag-group').value;
   const agDateRange = document.getElementById('ag-date').value;
@@ -1205,10 +1208,12 @@ function renderAgents() {
   }
 
   destroyChart('agents-activity-chart');
-  charts['agents-activity-chart'] = new Chart(document.getElementById('agents-activity-chart'), { type:'bar', data:{ labels:agLabels, datasets:[{ label:'Found', data:regroup(baseWeeklyFound), backgroundColor:P, borderRadius:4, barPercentage:0.5 },{ label:'Approved', data:regroup(baseWeeklyApproved), backgroundColor:G, borderRadius:4, barPercentage:0.5 },{ label:'Rejected', data:regroup(baseWeeklyRejected), backgroundColor:R, borderRadius:4, barPercentage:0.5 }]}, options:chartOpts });
-
-  destroyChart('agents-quality-chart');
-  charts['agents-quality-chart'] = new Chart(document.getElementById('agents-quality-chart'), { type:'bar', data:{ labels:['Reply Rate','Interest Rate','Approval Rate','Shortlist Rate'], datasets:[{ label:'Agent', data:[15.8,+intRate,+avgApproval,72.4], backgroundColor:P, borderRadius:4, barPercentage:0.5 },{ label:'Manual', data:[13.4,7.8,100,58.6], backgroundColor:'#DDD', borderRadius:4, barPercentage:0.5 }]}, options:{...chartOpts, scales:{...chartOpts.scales, y:{...chartOpts.scales.y, ticks:{...chartOpts.scales.y.ticks, callback:v=>v+'%'}}}} });
+  const approvedData = regroup(baseWeeklyApproved);
+  const rejectedData = regroup(baseWeeklyRejected);
+  charts['agents-activity-chart'] = new Chart(document.getElementById('agents-activity-chart'), { type:'bar', data:{ labels:agLabels, datasets:[
+    { label:'Approved', data:approvedData, backgroundColor:G, borderRadius:0, borderSkipped:true, barPercentage:0.6 },
+    { label:'Rejected', data:rejectedData, backgroundColor:'#F67E7D', borderRadius:{topLeft:4,topRight:4,bottomLeft:0,bottomRight:0}, borderSkipped:'bottom', barPercentage:0.6 }
+  ]}, options:{...chartOpts, layout:{padding:{left:20,right:20,top:10}}, scales:{...chartOpts.scales, x:{...chartOpts.scales.x, stacked:true, offset:true}, y:{...chartOpts.scales.y, stacked:true, grace:'5%'}}, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>{const total = approvedData[ctx.dataIndex]+rejectedData[ctx.dataIndex]; const pct = (ctx.parsed.y/total*100).toFixed(0); return `${ctx.dataset.label}: ${ctx.parsed.y} (${pct}%)`;}}}}} });
 
   const agRows = filtered.map(a => ({
     ...a, iRate: a.contacted > 0 ? +(a.interested/a.contacted*100).toFixed(1) : 0
@@ -1222,47 +1227,47 @@ function renderAgents() {
     `<tr><td style="font-weight:600">${a.name}</td><td>${a.owner}</td><td>${statusBadge(a.status)}</td><td>${a.found}</td><td><div class="progress-bar"><div class="progress-fill" style="width:${a.approvalRate}%"></div></div>${a.approvalRate}%</td><td>${a.shortlisted}</td><td>${a.contacted}</td><td>${a.interested}</td><td style="font-weight:600;color:#333">${a.iRate}%</td></tr>`
   ).join('');
 
-  // Agent insights
+  // Agent insights — only actionable, each with in-product CTA
   const agInsights = [];
   const activeAgents = agRows.filter(a => a.status === 'Active');
 
-  // Low approval rate = agent needs calibration
-  activeAgents.forEach(a => {
-    if (a.approvalRate < 65 && a.found >= 20) {
-      agInsights.push(renderInsight('⚙', 'action',
-        `"${a.name}" has a ${a.approvalRate}% approval rate — consider recalibrating`,
-        `${a.owner} is rejecting ${100-a.approvalRate}% of this agent's suggestions. Tightening the agent's search criteria or adding negative examples from rejected candidates could significantly improve signal-to-noise.`
-      ));
-    }
-  });
-
-  // Agent ROI framing
+  // Low-calibration agents — action: recalibrate
   if (activeAgents.length > 0) {
-    const totalAgentFound = activeAgents.reduce((s,a) => s+a.found, 0);
-    const totalAgentInterested = activeAgents.reduce((s,a) => s+a.interested, 0);
-    const agentCost = activeAgents.length * 199;
-    if (totalAgentInterested > 0) {
-      const costPerInterested = Math.round(agentCost / totalAgentInterested);
-      agInsights.push(renderInsight('$', 'positive',
-        `Agents are generating interested replies at $${costPerInterested} each`,
-        `${activeAgents.length} active agent${activeAgents.length>1?'s':''} ($${agentCost}/mo) sourced <strong>${totalAgentFound}</strong> candidates, leading to <strong>${totalAgentInterested}</strong> interested replies this period. ${costPerInterested < 100 ? 'This is strong ROI compared to typical recruiter sourcing costs.' : 'Consider whether higher-calibration agents could improve this ratio.'}`
+    const lowCalibration = activeAgents.filter(a => a.approvalRate < 65 && a.found >= 20);
+    if (lowCalibration.length > 0) {
+      const names = lowCalibration.map(a => `"${a.name}"`).join(', ');
+      agInsights.push(renderInsight('⚙', 'action',
+        `${lowCalibration.length} agent${lowCalibration.length>1?'s':''} below 65% approval rate — ${names}`,
+        `These agents are surfacing candidates your team keeps rejecting. Providing "thumbs down" feedback on rejected candidates trains the agent to find better matches.`,
+        'Recalibrate agent'
       ));
     }
   }
 
-  // Best performing agent
-  if (activeAgents.length >= 2) {
-    const ratedAgents = activeAgents.filter(a => a.contacted >= 5);
-    if (ratedAgents.length >= 2) {
-      const bestAgent = ratedAgents.reduce((a,b) => a.iRate > b.iRate ? a : b);
-      const avgAgRate = ratedAgents.reduce((s,a) => s+a.iRate, 0) / ratedAgents.length;
-      if (bestAgent.iRate > avgAgRate * 1.2) {
-        agInsights.push(renderInsight('★', 'positive',
-          `"${bestAgent.name}" leads with ${bestAgent.iRate}% interest rate`,
-          `${(bestAgent.iRate / avgAgRate).toFixed(1)}x the agent average of ${avgAgRate.toFixed(1)}%. Review its search criteria and use it as a baseline when configuring new agents.`
+  // High cost per interested reply — action: improve calibration or pause underperformers
+  if (activeAgents.length > 0) {
+    const totalAgentInterested = activeAgents.reduce((s,a) => s+a.interested, 0);
+    const agentCost = activeAgents.length * 199;
+    if (totalAgentInterested > 0) {
+      const costPerInterested = Math.round(agentCost / totalAgentInterested);
+      if (costPerInterested > 100) {
+        agInsights.push(renderInsight('$', 'warning',
+          `Agent cost per interested reply is $${costPerInterested} — above the $100 efficiency threshold`,
+          `At $${agentCost}/mo for ${activeAgents.length} agents, improving calibration or pausing low-performing agents could significantly improve ROI.`,
+          'Review agent settings'
         ));
       }
     }
+  }
+
+  // Paused/inactive agents still costing money — action: reactivate or remove
+  const pausedAgents = agRows.filter(a => a.status === 'Paused');
+  if (pausedAgents.length > 0) {
+    agInsights.push(renderInsight('!', 'warning',
+      `${pausedAgents.length} paused agent${pausedAgents.length>1?'s':''} — still counting toward your agent limit`,
+      `Paused agents aren't sourcing but may still count toward your plan's agent cap. Reactivate them on active projects or remove them to free up capacity.`,
+      'Manage agents'
+    ));
   }
 
   renderInsightsBlock('ag-insights', agInsights);
@@ -1272,8 +1277,12 @@ function renderAgents() {
 // TAB / MODE SWITCHING
 // ══════════════════════════════════════
 let currentTab = 'usage', currentMode = 'populated';
+const MVP_TABS = ['usage', 'projects'];
+const ALL_TABS = ['usage', 'projects', 'outreach', 'agents'];
 
 function switchTab(tab) {
+  // Don't allow switching to non-MVP tabs in MVP mode
+  if (currentMode === 'mvp' && !MVP_TABS.includes(tab)) return;
   currentTab = tab;
   document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
   document.getElementById('tab-' + tab).classList.remove('hidden');
@@ -1288,15 +1297,47 @@ function switchTab(tab) {
 
 function setMode(mode) {
   currentMode = mode;
-  document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.toggle('active', btn.textContent.toLowerCase().includes(mode==='populated'?'data':'empty')));
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    const label = btn.textContent.toLowerCase();
+    btn.classList.toggle('active',
+      (mode==='mvp' && label==='mvp') ||
+      (mode==='populated' && label==='v2+') ||
+      (mode==='empty' && label.includes('empty'))
+    );
+  });
+
+  // Show/hide tabs based on mode
+  const v2OnlyTabs = ['outreach', 'agents'];
+  document.querySelectorAll('.analytics-tab').forEach(el => {
+    if (v2OnlyTabs.includes(el.dataset.tab)) {
+      el.style.display = mode === 'mvp' ? 'none' : '';
+    }
+  });
+  document.querySelectorAll('#analytics-subnav .sidebar-item').forEach(el => {
+    if (v2OnlyTabs.includes(el.dataset.tab)) {
+      el.style.display = mode === 'mvp' ? 'none' : '';
+    }
+  });
+
+  // If current tab is hidden in MVP mode, switch to projects (highest priority per doc)
+  if (mode === 'mvp' && !MVP_TABS.includes(currentTab)) {
+    switchTab('projects');
+    return;
+  }
+
+  // Hide MVP-specific elements in v2+ mode and vice versa
+  document.querySelectorAll('.mvp-only').forEach(el => el.style.display = mode === 'mvp' ? '' : 'none');
+  document.querySelectorAll('.v2-only').forEach(el => el.style.display = mode === 'mvp' ? 'none' : '');
+
   applyMode();
-  if (mode === 'populated') renderCurrentTab();
+  if (mode !== 'empty') renderCurrentTab();
 }
 
 function applyMode() {
   const tab = document.getElementById('tab-' + currentTab);
-  tab.querySelectorAll('.state-populated').forEach(el => el.classList.toggle('hidden', currentMode==='empty'));
-  tab.querySelectorAll('.state-empty').forEach(el => el.classList.toggle('hidden', currentMode==='populated'));
+  const showData = currentMode !== 'empty';
+  tab.querySelectorAll('.state-populated').forEach(el => el.classList.toggle('hidden', !showData));
+  tab.querySelectorAll('.state-empty').forEach(el => el.classList.toggle('hidden', showData));
 }
 
 function renderCurrentTab() {
