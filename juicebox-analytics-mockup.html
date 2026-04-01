@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juicebox Analytics — Interactive Mockup</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #111; font-size: 14px; }
+
+  .app { display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 220px; min-width: 220px; background: #FAFAFA; border-right: 1px solid #E5E5E5; display: flex; flex-direction: column; overflow-y: auto; }
+  .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+  .sidebar-logo { padding: 16px 16px 12px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo svg { width: 28px; height: 28px; }
+  .sidebar-logo span { font-weight: 600; font-size: 15px; color: #111; }
+  .sidebar-section { padding: 4px 8px; }
+  .sidebar-section-label { font-size: 11px; text-transform: uppercase; color: #999; font-weight: 600; padding: 8px 12px 4px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; cursor: pointer; color: #555; font-size: 13.5px; font-weight: 500; transition: all 0.15s; }
+  .sidebar-item:hover { background: #F0F0F0; color: #333; }
+  .sidebar-item.active { background: #EDE4F7; color: #7B2CBF; }
+  .sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .sidebar-sub { padding-left: 20px; }
+  .sidebar-sub .sidebar-item { font-size: 13px; padding: 6px 12px; }
+  .sidebar-divider { height: 1px; background: #E5E5E5; margin: 8px 16px; }
+  .sidebar-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid #E5E5E5; }
+  .sidebar-user { display: flex; align-items: center; gap: 8px; }
+  .sidebar-avatar { width: 28px; height: 28px; border-radius: 50%; background: #7B2CBF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+  .sidebar-user-info .name { font-weight: 600; color: #333; font-size: 12px; }
+  .sidebar-user-info .org { color: #999; font-size: 11px; }
+
+  .mode-toggle { position: fixed; top: 12px; right: 16px; z-index: 100; display: flex; background: #F0F0F0; border-radius: 8px; padding: 3px; gap: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .mode-btn { padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; font-weight: 600; background: transparent; color: #666; transition: all 0.15s; }
+  .mode-btn.active { background: #7B2CBF; color: #fff; }
+
+  .page-header { padding: 20px 28px 0; }
+  .breadcrumb { font-size: 12px; color: #999; margin-bottom: 4px; }
+  .breadcrumb span { color: #7B2CBF; }
+  .page-title { font-size: 24px; font-weight: 600; color: #111; }
+
+  .analytics-tabs { display: flex; gap: 0; padding: 0 28px; margin-top: 16px; border-bottom: 1px solid #E5E5E5; }
+  .analytics-tab { padding: 10px 20px; font-size: 13.5px; font-weight: 500; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .analytics-tab:hover { color: #555; }
+  .analytics-tab.active { color: #7B2CBF; border-bottom-color: #7B2CBF; font-weight: 600; }
+
+  /* ── Filter bars ── */
+  .global-filters { display: flex; align-items: flex-end; gap: 12px; padding: 16px 28px 12px; background: #FAFAFA; border-bottom: 1px solid #EAEAEA; }
+  .global-filters-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #7B2CBF; margin-right: 4px; align-self: center; white-space: nowrap; }
+  .section-filters { display: flex; align-items: flex-end; gap: 12px; padding: 12px 28px; margin: 0 28px 12px; background: #fff; border: 1px solid #EAEAEA; border-radius: 8px; }
+  .section-filters-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-right: 4px; align-self: center; white-space: nowrap; }
+  .filter-group { display: flex; flex-direction: column; gap: 2px; }
+  .filter-select { padding: 7px 28px 7px 12px; border: 1px solid #DDD; border-radius: 6px; font-size: 13px; color: #333; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center; appearance: none; cursor: pointer; }
+  .filter-select:focus { border-color: #7B2CBF; outline: none; }
+  .filter-label { font-size: 11px; color: #888; font-weight: 500; }
+
+  .kpi-row { display: grid; gap: 16px; padding: 0 28px 16px; }
+  .kpi-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .kpi-row.cols-6 { grid-template-columns: repeat(6, 1fr); }
+  .kpi-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .kpi-card { background: #fff; border: 1px solid #EAEAEA; border-radius: 8px; padding: 16px; }
+  .kpi-label { font-size: 12.5px; color: #777; font-weight: 500; margin-bottom: 6px; }
+  .kpi-value { font-size: 28px; font-weight: 700; color: #111; }
+  .kpi-sub { font-size: 12px; color: #999; margin-top: 2px; }
+  .kpi-change { font-size: 11px; margin-top: 4px; font-weight: 600; cursor: default; }
+  .kpi-change.up { color: #16a34a; }
+  .kpi-change.down { color: #dc2626; }
+  .kpi-prev { color: #999; font-weight: 400; }
+
+  /* ── Metric tooltips ── */
+  .has-tip { position: relative; }
+  .has-tip { cursor: help; }
+  .has-tip .tip-text { display: none; position: absolute; left: 0; top: calc(100% + 6px); background: #333; color: #fff; font-size: 11px; font-weight: 400; padding: 8px 12px; border-radius: 6px; width: 260px; z-index: 50; line-height: 1.4; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-transform: none; letter-spacing: 0; }
+  .has-tip:hover .tip-text { display: block; }
+  th.has-tip .tip-text { left: auto; right: 0; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 28px 20px; }
+  .chart-card { background: #fff; border: 1px solid #EAEAEA; border-radius: 8px; padding: 20px; }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; }
+  .chart-legend { display: flex; gap: 16px; font-size: 12px; color: #888; }
+  .chart-legend-item { display: flex; align-items: center; gap: 4px; }
+  .chart-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .chart-container { position: relative; height: 260px; margin-top: 12px; }
+
+  .table-section { padding: 0 28px 28px; }
+  .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .table-title { font-size: 14px; font-weight: 600; color: #333; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.3px; padding: 10px 12px; border-bottom: 1px solid #E5E5E5; }
+  td { padding: 12px; font-size: 13px; color: #333; border-bottom: 1px solid #F0F0F0; }
+  tr:hover td { background: #FAFAFA; }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .status-active { background: #DCFCE7; color: #16a34a; }
+  .status-paused { background: #FEF3C7; color: #D97706; }
+  .status-completed { background: #E0E7FF; color: #4F46E5; }
+  .progress-bar { height: 6px; background: #F0F0F0; border-radius: 3px; overflow: hidden; width: 100px; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  .progress-fill { height: 100%; border-radius: 3px; background: #7B2CBF; }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 40px; text-align: center; }
+  .empty-state svg { width: 120px; height: 120px; color: #DDD; margin-bottom: 20px; }
+  .empty-state h3 { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; color: #888; max-width: 400px; line-height: 1.5; }
+  .empty-state .cta-btn { margin-top: 20px; padding: 10px 24px; background: #7B2CBF; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .empty-state .cta-btn:hover { background: #6A1FA8; }
+
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { color: #7B2CBF; }
+  th.sortable::after { content: ' ↕'; font-size: 10px; color: #CCC; }
+  th.sortable.sorted-desc::after { content: ' ↓'; color: #7B2CBF; }
+  th.sortable.sorted-asc::after { content: ' ↑'; color: #7B2CBF; }
+
+  /* ── Channel badges ── */
+  .ch-badge { display:inline-block; font-size:10px; font-weight:500; padding:1px 6px; border-radius:3px; margin-right:3px; }
+  .ch-badge.email { background:#EDE9FE; color:#7B2CBF; }
+  .ch-badge.linkedin { background:#DBEAFE; color:#1D4ED8; }
+  .ch-badge.sms { background:#D1FAE5; color:#047857; }
+  .proj-count { display:inline-block; position:relative; font-size:10.5px; color:#999; cursor:default; }
+  .proj-tooltip { display:none; position:absolute; background:#fff; border:1px solid #E5E5E5; border-radius:6px; padding:8px 12px; font-size:11px; color:#555; box-shadow:0 4px 12px rgba(0,0,0,.1); z-index:10; white-space:nowrap; line-height:1.6; }
+  .proj-count:hover .proj-tooltip { display:block; margin-top:4px; }
+  .pagination-btn { padding:4px 10px; border:1px solid #E5E5E5; border-radius:4px; background:#fff; font-size:12px; color:#555; cursor:pointer; }
+  .pagination-btn:hover { background:#F5F5F5; }
+  .pagination-btn:disabled { opacity:0.4; cursor:default; }
+
+  /* ── Plan usage bars ── */
+  .plan-card { background: #fff; border: 1px solid #EAEAEA; border-radius: 8px; padding: 16px; }
+  .plan-card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .plan-card-title { font-size: 12.5px; color: #777; font-weight: 500; }
+  .plan-card-usage { font-size: 13px; font-weight: 600; color: #333; }
+  .plan-bar { height: 8px; background: #F0F0F0; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+  .plan-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .plan-detail { font-size: 11px; color: #999; line-height: 1.5; }
+  .plan-detail strong { color: #555; font-weight: 600; }
+
+  .hidden { display: none !important; }
+  .content-area { flex: 1; overflow-y: auto; }
+  .pad-top { padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar (unchanged) -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" stroke="#7B2CBF" stroke-width="2.5"/><path d="M12 10c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4zm-2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#7B2CBF" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <span>Juicebox</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>All Projects</div>
+      <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>All Agents</div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>SaaS Startup Hiring</div>
+      <div class="sidebar-sub">
+        <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Searches</div>
+        <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>Shortlist</div>
+        <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Contacts</div>
+        <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>Sequences</div>
+        <div class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17V11M12 17V7M16 17V13"/></svg>Analytics</div>
+        <div class="sidebar-sub" id="analytics-subnav">
+          <div class="sidebar-item active" data-tab="usage" onclick="switchTab('usage')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Usage</div>
+          <div class="sidebar-item" data-tab="projects" onclick="switchTab('projects')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Projects</div>
+          <div class="sidebar-item" data-tab="outreach" onclick="switchTab('outreach')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>Outreach</div>
+          <div class="sidebar-item" data-tab="agents" onclick="switchTab('agents')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1a4 4 0 01-8 0V6a4 4 0 014-4z"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M9 12l2 2 4-4"/></svg>Agents</div>
+        </div>
+        <div class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>Integrations</div>
+      </div>
+    </div>
+    <div class="sidebar-bottom"><div class="sidebar-user"><div class="sidebar-avatar">CA</div><div class="sidebar-user-info"><div class="name">Christopher Albanese</div><div class="org">Acme Talent</div></div></div></div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setMode('populated')">With Data</button>
+      <button class="mode-btn" onclick="setMode('empty')">Empty State</button>
+    </div>
+    <div class="page-header">
+      <div class="breadcrumb">Analytics &gt; <span id="breadcrumb-tab">Usage</span></div>
+      <div class="page-title" id="page-title">Usage</div>
+    </div>
+    <div class="analytics-tabs">
+      <div class="analytics-tab active" data-tab="usage" onclick="switchTab('usage')">Usage</div>
+      <div class="analytics-tab" data-tab="projects" onclick="switchTab('projects')">Projects</div>
+      <div class="analytics-tab" data-tab="outreach" onclick="switchTab('outreach')">Outreach</div>
+      <div class="analytics-tab" data-tab="agents" onclick="switchTab('agents')">Agents</div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- ═══ USAGE ═══ -->
+      <div id="tab-usage" class="tab-content">
+        <div class="global-filters">
+          <div class="global-filters-label">Page filters</div>
+          <div class="filter-group"><div class="filter-label">Date range</div><select class="filter-select" id="usage-date" onchange="renderUsage()"><option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="90">Last 90 days</option></select></div>
+          <div class="filter-group"><div class="filter-label">Team member</div><select class="filter-select" id="usage-user" onchange="renderUsage()"><option value="all">All users</option></select></div>
+        </div>
+        <div class="state-populated pad-top">
+          <div id="usage-kpis-outcome" class="kpi-row cols-4"></div>
+          <div id="usage-kpis-activity" class="kpi-row cols-5"></div>
+          <!-- Plan usage -->
+          <div id="usage-plan-section" style="padding:0 28px 16px;">
+            <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:12px;">Plan usage <span style="font-size:12px;font-weight:400;color:#999;">this billing period</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="usage-plan-cards"></div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;padding:0 28px 8px;">
+            <div class="filter-group"><div class="filter-label">Grouped by</div><select class="filter-select" id="usage-group" onchange="renderUsage()" style="font-size:12px;padding:5px 24px 5px 10px;"><option value="weeks">Weeks</option><option value="days">Days</option><option value="months">Months</option></select></div>
+          </div>
+          <div class="charts-row">
+            <div class="chart-card"><div class="chart-title">Contact credits used (email/phone)</div><div class="chart-container"><canvas id="usage-credits-chart"></canvas></div></div>
+            <div class="chart-card"><div class="chart-title">Export credits used (CSV/PDF)</div><div class="chart-container"><canvas id="usage-exports-chart"></canvas></div></div>
+          </div>
+          <div class="charts-row"><div class="chart-card full"><div class="chart-title">Team activity over time<div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#7B2CBF"></div>Searches</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#B84BEE"></div>Reviewed</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#16a34a"></div>Shortlisted</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#D97706"></div>Contacted</div></div></div><div class="chart-container"><canvas id="usage-activity-chart"></canvas></div></div></div>
+          <div class="table-section">
+            <div class="table-header"><div class="table-title">Team activity</div></div>
+            <table><thead><tr><th>Recruiter</th><th class="sortable sorted-desc has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied with positive interest.</span></th><th class="sortable has-tip" data-col="rate">Interest Rate<span class="tip-text">Interested replies ÷ candidates contacted.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="searches">Searches<span class="tip-text">Total AI-powered searches run.</span></th><th class="sortable has-tip" data-col="reviewed">Reviewed<span class="tip-text">Candidate profiles viewed in detail.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to a project shortlist.</span></th><th class="sortable has-tip" data-col="contacts">Contact Credits<span class="tip-text">Contact credits used to reveal email/phone.</span></th><th class="sortable has-tip" data-col="exports">Export Credits<span class="tip-text">Export credits used (CSV/PDF).</span></th></tr></thead><tbody id="usage-table-body"></tbody></table>
+          </div>
+        </div>
+        <div class="state-empty hidden"><div class="empty-state"><svg viewBox="0 0 120 120" fill="none" stroke="#DDD" stroke-width="2"><rect x="10" y="20" width="100" height="80" rx="8"/><path d="M30 70V50M50 70V40M70 70V55M90 70V35" stroke-width="4" stroke-linecap="round"/></svg><h3>No usage data yet</h3><p>Once your team starts searching, reviewing profiles, and using agents, you'll see activity trends and outcomes here.</p><button class="cta-btn">Run your first search</button></div></div>
+      </div>
+
+      <!-- ═══ PROJECTS ═══ -->
+      <div id="tab-projects" class="tab-content hidden">
+        <div class="global-filters">
+          <div class="global-filters-label">Page filters</div>
+          <div class="filter-group"><div class="filter-label">Date range</div><select class="filter-select" id="proj-date" onchange="renderProjects()"><option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="90">Last 90 days</option></select></div>
+          <div class="filter-group"><div class="filter-label">Recruiter</div><select class="filter-select" id="proj-user" onchange="renderProjects()"><option value="all">All recruiters</option></select></div>
+          <div class="filter-group"><div class="filter-label">Status</div><select class="filter-select" id="proj-status" onchange="renderProjects()"><option value="all">All statuses</option><option value="Active">Active</option><option value="Paused">Paused</option><option value="Completed">Completed</option></select></div>
+          <div class="filter-group"><div class="filter-label">Project</div><select class="filter-select" id="proj-project" onchange="renderProjects()"><option value="all">All projects</option></select></div>
+        </div>
+        <div class="state-populated pad-top">
+          <div id="proj-kpis" class="kpi-row cols-4"></div>
+          <div class="charts-row"><div class="chart-card full"><div class="chart-title" id="proj-funnel-title">Aggregate sourcing funnel</div><div class="chart-container"><canvas id="projects-funnel-chart"></canvas></div></div></div>
+          <div class="table-section"><div class="table-header"><div class="table-title">Projects by pipeline health</div></div><table data-sort-table="proj"><thead><tr><th class="sortable" data-col="name">Project</th><th class="sortable" data-col="user">Recruiter</th><th class="sortable" data-col="status">Status</th><th class="sortable has-tip" data-col="found">Found<span class="tip-text">Candidate profiles discovered by search or agent.</span></th><th class="sortable has-tip" data-col="reviewed">Reviewed<span class="tip-text">Profiles viewed in detail.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to shortlist.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="replied">Replied<span class="tip-text">Candidates who replied (any sentiment).</span></th><th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied positively.</span></th><th class="sortable has-tip" data-col="iRate">Interested %<span class="tip-text">Interested ÷ contacted.</span></th></tr></thead><tbody id="proj-table-body"></tbody></table></div>
+        </div>
+        <div class="state-empty hidden"><div class="empty-state"><svg viewBox="0 0 120 120" fill="none" stroke="#DDD" stroke-width="2"><rect x="15" y="10" width="90" height="30" rx="4"/><rect x="15" y="48" width="90" height="30" rx="4"/><rect x="15" y="86" width="90" height="30" rx="4"/><path d="M30 25h50M30 63h40M30 101h45" stroke-width="3" stroke-linecap="round"/></svg><h3>No project data yet</h3><p>Create a project and start building your candidate pipeline.</p><button class="cta-btn">Create new project</button></div></div>
+      </div>
+
+      <!-- ═══ OUTREACH ═══ -->
+      <div id="tab-outreach" class="tab-content hidden">
+        <div class="global-filters">
+          <div class="global-filters-label">Page filters</div>
+          <div class="filter-group"><div class="filter-label">Date range</div><select class="filter-select" id="out-date" onchange="renderOutreach()"><option value="365">Last 1 year</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></div>
+          <div class="filter-group"><div class="filter-label">Started by</div><select class="filter-select" id="out-user" onchange="renderOutreach()"><option value="all">All users</option></select></div>
+        </div>
+        <div class="section-filters" style="margin-top:12px">
+          <div class="section-filters-label">Sequence filters</div>
+          <div class="filter-group"><div class="filter-label">Sequence</div><select class="filter-select" id="out-seq" onchange="renderOutreach()"><option value="all">All sequences</option></select></div>
+          <div class="filter-group"><div class="filter-label">Project</div><select class="filter-select" id="out-proj" onchange="renderOutreach()"><option value="all">All projects</option></select></div>
+          <div class="filter-group"><div class="filter-label">Inboxes</div><select class="filter-select" id="out-inbox" onchange="renderOutreach()"><option value="all">All inboxes</option></select></div>
+          <div class="filter-group"><div class="filter-label">Channel</div><select class="filter-select" id="out-channel" onchange="renderOutreach()"><option value="all">All channels</option><option value="email">Email</option><option value="linkedin">LinkedIn InMail</option><option value="sms">SMS</option></select></div>
+        </div>
+        <div class="state-populated">
+          <div id="out-kpis" class="kpi-row cols-6"></div>
+          <div style="display:flex;justify-content:flex-end;padding:0 28px 8px;">
+            <div class="filter-group"><div class="filter-label">Grouped by</div><select class="filter-select" id="out-group" onchange="renderOutreach()" style="font-size:12px;padding:5px 24px 5px 10px;"><option value="months">Months</option><option value="weeks">Weeks</option></select></div>
+          </div>
+          <div class="charts-row">
+            <div class="chart-card"><div class="chart-title">Sequence runs over time<div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#F67E7D"></div>User runs</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#7B2CBF"></div>Agent runs</div></div></div><div class="chart-container"><canvas id="outreach-runs-chart"></canvas></div></div>
+            <div class="chart-card"><div class="chart-title">Messages sent and scheduled<div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#7B2CBF"></div>Sent</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#4CC9A0"></div>Scheduled</div></div></div><div class="chart-container"><canvas id="outreach-emails-chart"></canvas></div></div>
+          </div>
+          <div class="table-section">
+            <div class="table-header" style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="table-title">Sequences</div>
+              <input type="text" id="out-table-search" placeholder="Search sequences..." onkeyup="renderOutreachTable()" style="font-size:12px;padding:6px 12px;border:1px solid #E5E5E5;border-radius:6px;width:220px;outline:none;">
+            </div>
+            <table data-sort-table="out"><thead><tr>
+              <th class="sortable" data-col="seq">Sequence</th>
+              <th class="sortable" data-col="owner">Owner</th>
+              <th>Projects</th>
+              <th class="sortable has-tip" data-col="total">Total<span class="tip-text">Total messages sent across all channels.</span></th>
+              <th class="sortable has-tip" data-col="active">Active<span class="tip-text">Sequences currently in progress.</span></th>
+              <th class="sortable has-tip" data-col="opened">Opened<span class="tip-text">Messages opened by recipient. Tracked for email; not available for all channels.</span></th>
+              <th class="sortable has-tip" data-col="clicked">Clicked<span class="tip-text">Messages where a link was clicked.</span></th>
+              <th class="sortable has-tip" data-col="replied">Replied<span class="tip-text">Messages that received a reply (any sentiment), across all channels.</span></th>
+              <th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Replies expressing positive interest.</span></th>
+              <th class="sortable has-tip" data-col="interestRate">Interest Rate<span class="tip-text">Interested replies as a percentage of total messages sent.</span></th>
+              <th class="sortable has-tip" data-col="bounced">Bounced<span class="tip-text">Messages that failed to deliver.</span></th>
+            </tr></thead><tbody id="out-table-body"></tbody></table>
+            <div id="out-table-pagination" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:12px;color:#888;border-top:1px solid #F0F0F0;"></div>
+          </div>
+        </div>
+        <div class="state-empty hidden"><div class="empty-state"><svg viewBox="0 0 120 120" fill="none" stroke="#DDD" stroke-width="2"><rect x="15" y="25" width="90" height="70" rx="6"/><path d="M15 45l45 25 45-25" stroke-width="2.5"/></svg><h3>No outreach data yet</h3><p>Create a sequence and start reaching out to candidates.</p><button class="cta-btn">Create new sequence</button></div></div>
+      </div>
+
+      <!-- ═══ AGENTS ═══ -->
+      <div id="tab-agents" class="tab-content hidden">
+        <div class="global-filters">
+          <div class="global-filters-label">Page filters</div>
+          <div class="filter-group"><div class="filter-label">Date range</div><select class="filter-select" id="ag-date" onchange="renderAgents()"><option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="90">Last 90 days</option></select></div>
+          <div class="filter-group"><div class="filter-label">Owner</div><select class="filter-select" id="ag-owner" onchange="renderAgents()"><option value="all">All users</option></select></div>
+        </div>
+        <div class="section-filters" style="margin-top:12px">
+          <div class="section-filters-label">Agent filters</div>
+          <div class="filter-group"><div class="filter-label">Agent</div><select class="filter-select" id="ag-agent" onchange="renderAgents()"><option value="all">All agents</option></select></div>
+          <div class="filter-group"><div class="filter-label">Status</div><select class="filter-select" id="ag-status" onchange="renderAgents()"><option value="all">All statuses</option><option value="Active">Active</option><option value="Paused">Paused</option></select></div>
+        </div>
+        <div class="state-populated">
+          <div id="ag-kpis" class="kpi-row cols-5"></div>
+          <div style="display:flex;justify-content:flex-end;padding:0 28px 8px;">
+            <div class="filter-group"><div class="filter-label">Grouped by</div><select class="filter-select" id="ag-group" onchange="renderAgents()" style="font-size:12px;padding:5px 24px 5px 10px;"><option value="weeks">Weeks</option><option value="days">Days</option><option value="months">Months</option></select></div>
+          </div>
+          <div class="charts-row">
+            <div class="chart-card"><div class="chart-title">Agent activity over time<div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#7B2CBF"></div>Found</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#16a34a"></div>Approved</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#dc2626"></div>Rejected</div></div></div><div class="chart-container"><canvas id="agents-activity-chart"></canvas></div></div>
+            <div class="chart-card"><div class="chart-title">Agent vs. manual quality<div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#7B2CBF"></div>Agent</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:#DDD"></div>Manual</div></div></div><div class="chart-container"><canvas id="agents-quality-chart"></canvas></div></div>
+          </div>
+          <div class="table-section"><div class="table-header"><div class="table-title">Agent performance</div></div><table data-sort-table="ag"><thead><tr><th class="sortable" data-col="name">Agent</th><th class="sortable" data-col="owner">Owner</th><th class="sortable" data-col="status">Status</th><th class="sortable has-tip" data-col="found">Found<span class="tip-text">Profiles discovered by this agent.</span></th><th class="sortable has-tip" data-col="approvalRate">Approval Rate<span class="tip-text">% of agent-surfaced candidates approved by the recruiter during review.</span></th><th class="sortable has-tip" data-col="shortlisted">Shortlisted<span class="tip-text">Candidates added to shortlist after approval.</span></th><th class="sortable has-tip" data-col="contacted">Contacted<span class="tip-text">Candidates who received outreach.</span></th><th class="sortable has-tip" data-col="interested">Interested<span class="tip-text">Candidates who replied positively.</span></th><th class="sortable has-tip" data-col="iRate">Interested %<span class="tip-text">Interested ÷ contacted. Key measure of agent quality.</span></th></tr></thead><tbody id="ag-table-body"></tbody></table></div>
+        </div>
+        <div class="state-empty hidden"><div class="empty-state"><svg viewBox="0 0 120 120" fill="none" stroke="#DDD" stroke-width="2"><circle cx="60" cy="40" r="20"/><path d="M40 90c0-11 9-20 20-20s20 9 20 20"/><path d="M52 36l4 4 8-8" stroke-width="3"/></svg><h3>No agent data yet</h3><p>Create an agent and let it source candidates automatically.</p><button class="cta-btn">Create your first agent</button></div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// DATA MODEL — single source of truth
+// ══════════════════════════════════════
+const USERS = ['Sarah Kim','Mike Chen','Rachel Torres','David Park','Emily Liu','James Wu','Priya Patel','Tom Nguyen'];
+
+// Per-user base metrics (for 30-day period)
+const USER_DATA = {
+  'Sarah Kim':     { searches:89, reviewed:412, shortlisted:68, contacted:52, interested:11, contacts:148, exports:52, agentsActive:3 },
+  'Mike Chen':     { searches:71, reviewed:298, shortlisted:42, contacted:38, interested:6,  contacts:105, exports:38, agentsActive:2 },
+  'Rachel Torres': { searches:58, reviewed:224, shortlisted:35, contacted:30, interested:4,  contacts:78,  exports:28, agentsActive:1 },
+  'David Park':    { searches:44, reviewed:112, shortlisted:22, contacted:18, interested:3,  contacts:32,  exports:12, agentsActive:2 },
+  'Emily Liu':     { searches:76, reviewed:334, shortlisted:55, contacted:48, interested:7,  contacts:122, exports:42, agentsActive:2 },
+  'James Wu':      { searches:52, reviewed:178, shortlisted:28, contacted:24, interested:3,  contacts:56,  exports:20, agentsActive:1 },
+  'Priya Patel':   { searches:12, reviewed:24,  shortlisted:4,  contacted:8,  interested:1,  contacts:7,   exports:3,  agentsActive:0 },
+  'Tom Nguyen':    { searches:64, reviewed:265, shortlisted:51, contacted:44, interested:8,  contacts:94,  exports:28, agentsActive:1 },
+};
+
+// Date multipliers (rough scaling for different periods)
+const DATE_MULT = { '7': 0.28, '30': 1, '90': 2.6, '365': 8.5 };
+const PREV_MULT = { '7': 0.82, '30': 0.78, '90': 0.71, '365': 0.45 }; // prior period was lower
+
+// Projects
+const PROJECTS = [
+  { name:'Senior Backend Engineer', user:'Sarah Kim',     status:'Active',    found:312, reviewed:245, shortlisted:68, contacted:52, replied:18, interested:9,  velocity:1.8 },
+  { name:'ML Engineer',             user:'Mike Chen',     status:'Active',    found:189, reviewed:156, shortlisted:42, contacted:38, replied:11, interested:6,  velocity:2.1 },
+  { name:'Product Designer',        user:'Rachel Torres', status:'Active',    found:156, reviewed:134, shortlisted:35, contacted:30, replied:8,  interested:4,  velocity:2.5 },
+  { name:'DevOps Lead',             user:'David Park',    status:'Active',    found:98,  reviewed:78,  shortlisted:22, contacted:18, replied:4,  interested:1,  velocity:3.2 },
+  { name:'Frontend Engineer',       user:'Emily Liu',     status:'Active',    found:267, reviewed:210, shortlisted:55, contacted:48, replied:14, interested:7,  velocity:1.6 },
+  { name:'Head of Data',            user:'Sarah Kim',     status:'Paused',    found:45,  reviewed:38,  shortlisted:12, contacted:8,  replied:2,  interested:0,  velocity:4.1 },
+  { name:'Solutions Engineer',      user:'James Wu',      status:'Active',    found:134, reviewed:112, shortlisted:28, contacted:24, replied:7,  interested:3,  velocity:2.8 },
+  { name:'Staff Engineer',          user:'Tom Nguyen',    status:'Completed', found:220, reviewed:195, shortlisted:51, contacted:44, replied:16, interested:8,  velocity:1.4 },
+];
+
+// Sequences — each sequence can be used across multiple projects.
+// "runs" are the atomic unit: each run = one sequence sent to one candidate in one project via one channel.
+const SEQUENCE_DEFS = [
+  { name:'Warm Intro',          steps:4, owner:'Sarah Kim',     inbox:'sarah@acmetalent.com' },
+  { name:'Technical Deep Dive', steps:3, owner:'Mike Chen',     inbox:'mike@acmetalent.com' },
+  { name:'Culture-First',       steps:4, owner:'Emily Liu',     inbox:'emily@acmetalent.com' },
+  { name:'Agent Auto-Outreach', steps:3, owner:'David Park',    inbox:'david@acmetalent.com' },
+  { name:'Portfolio Ask',       steps:4, owner:'Rachel Torres', inbox:'rachel@acmetalent.com' },
+  { name:'Quick Connect',       steps:2, owner:'James Wu',      inbox:'james@acmetalent.com' },
+  { name:'Executive Reach',     steps:3, owner:'Tom Nguyen',    inbox:'tom@acmetalent.com' },
+];
+
+// Runs: sequence × project × channel — the raw data everything derives from
+const OUTREACH_RUNS = [
+  // Warm Intro used across 3 projects
+  { seq:'Warm Intro', project:'Senior Backend Engineer', user:'Sarah Kim',     channel:'email',    total:120, active:28, opened:82,  clicked:12, replied:22, interested:12, bounced:3 },
+  { seq:'Warm Intro', project:'ML Engineer',             user:'Sarah Kim',     channel:'email',    total:34,  active:8,  opened:22,  clicked:4,  replied:6,  interested:3,  bounced:1 },
+  { seq:'Warm Intro', project:'Staff Engineer',          user:'Sarah Kim',     channel:'email',    total:30,  active:6,  opened:22,  clicked:2,  replied:4,  interested:3,  bounced:1 },
+  // Technical Deep Dive used across 2 projects
+  { seq:'Technical Deep Dive', project:'ML Engineer',             user:'Mike Chen', channel:'email',    total:98,  active:24, opened:62,  clicked:9,  replied:16, interested:9,  bounced:3 },
+  { seq:'Technical Deep Dive', project:'Senior Backend Engineer', user:'Mike Chen', channel:'email',    total:58,  active:14, opened:36,  clicked:5,  replied:8,  interested:5,  bounced:1 },
+  // Culture-First across 2 projects
+  { seq:'Culture-First', project:'Frontend Engineer',       user:'Emily Liu',     channel:'email',    total:148, active:40, opened:98,  clicked:14, replied:20, interested:11, bounced:5 },
+  { seq:'Culture-First', project:'Product Designer',        user:'Emily Liu',     channel:'email',    total:55,  active:16, opened:36,  clicked:6,  replied:8,  interested:4,  bounced:2 },
+  // Agent Auto-Outreach — email + LinkedIn
+  { seq:'Agent Auto-Outreach', project:'DevOps Lead', user:'David Park', channel:'email',    total:72,  active:18, opened:41,  clicked:5,  replied:8,  interested:3,  bounced:3 },
+  { seq:'Agent Auto-Outreach', project:'DevOps Lead', user:'David Park', channel:'linkedin', total:40,  active:10, opened:0,   clicked:0,  replied:4,  interested:2,  bounced:0 },
+  // Portfolio Ask
+  { seq:'Portfolio Ask', project:'Product Designer', user:'Rachel Torres', channel:'email',    total:142, active:32, opened:78,  clicked:10, replied:18, interested:10, bounced:4 },
+  { seq:'Portfolio Ask', project:'Product Designer', user:'Rachel Torres', channel:'linkedin', total:50,  active:12, opened:0,   clicked:0,  replied:6,  interested:4,  bounced:0 },
+  // Quick Connect across 2 projects
+  { seq:'Quick Connect', project:'Solutions Engineer',      user:'James Wu',    channel:'email',    total:68,  active:16, opened:42,  clicked:6,  replied:10, interested:4,  bounced:2 },
+  { seq:'Quick Connect', project:'Senior Backend Engineer', user:'James Wu',    channel:'email',    total:24,  active:6,  opened:16,  clicked:2,  replied:3,  interested:1,  bounced:1 },
+  // Executive Reach
+  { seq:'Executive Reach', project:'Staff Engineer',  user:'Tom Nguyen', channel:'email',    total:88,  active:20, opened:62,  clicked:8,  replied:14, interested:7,  bounced:2 },
+  { seq:'Executive Reach', project:'Head of Data',    user:'Tom Nguyen', channel:'linkedin', total:28,  active:6,  opened:0,   clicked:0,  replied:3,  interested:1,  bounced:0 },
+];
+
+// Agents
+const AGENTS = [
+  { name:'Backend Eng Sourcer',       owner:'Sarah Kim',   status:'Active', found:456, approvalRate:78, shortlisted:356, contacted:210, interested:22 },
+  { name:'ML Talent Scout',           owner:'Mike Chen',   status:'Active', found:312, approvalRate:72, shortlisted:225, contacted:148, interested:16 },
+  { name:'Frontend Finder',           owner:'Emily Liu',   status:'Active', found:389, approvalRate:65, shortlisted:253, contacted:178, interested:14 },
+  { name:'DevOps Hunter',             owner:'David Park',  status:'Active', found:198, approvalRate:58, shortlisted:115, contacted:82,  interested:4 },
+  { name:'Design Talent Agent',       owner:'Rachel Torres',status:'Active',found:267, approvalRate:71, shortlisted:190, contacted:134, interested:11 },
+  { name:'Solutions Eng Recruiter',   owner:'James Wu',    status:'Paused', found:145, approvalRate:62, shortlisted:90,  contacted:56,  interested:3 },
+  { name:'Staff Eng Elite Search',    owner:'Tom Nguyen',  status:'Active', found:178, approvalRate:82, shortlisted:146, contacted:98,  interested:12 },
+];
+
+// Per-user daily data for 90 days (Jan 1 – Mar 31). Everything derives from this.
+// We generate it deterministically from a seed per user.
+function seededRandom(seed) {
+  let s = seed;
+  return function() { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
+}
+
+const USER_DAILY = {};
+const ALL_DAYS_90 = []; // 90 day labels
+for (let m = 0; m < 3; m++) {
+  const monthNames = ['Jan','Feb','Mar'];
+  const daysInMonth = [31, 28, 31];
+  for (let d = 1; d <= daysInMonth[m]; d++) {
+    ALL_DAYS_90.push(`${monthNames[m]} ${d}`);
+  }
+}
+
+// Daily averages per user (scaled so 30-day totals match USER_DATA)
+USERS.forEach((u, ui) => {
+  const d = USER_DATA[u];
+  const rng = seededRandom(ui * 1000 + 42);
+  const fields = ['searches','reviewed','contacts','exports','shortlisted','contacted'];
+  USER_DAILY[u] = {};
+  fields.forEach(f => {
+    const dailyAvg = d[f] / 30;
+    // Generate 90 days with day-of-week pattern (lower on weekends) and some noise
+    USER_DAILY[u][f] = ALL_DAYS_90.map((_, i) => {
+      const dow = i % 7;
+      const weekendMult = dow >= 5 ? 0.3 : 1.1;
+      const noise = 0.5 + rng() * 1.0;
+      return Math.max(0, Math.round(dailyAvg * weekendMult * noise));
+    });
+  });
+});
+
+// Get time series labels + data for a user/field given date range and grouping
+function getTimeConfig(dateRange, grouping) {
+  const days = +dateRange;
+  const dailyLabels = ALL_DAYS_90.slice(-days);
+  const startIdx = ALL_DAYS_90.length - days;
+
+  if (grouping === 'days') {
+    // For 7 days show all, for 30 show all, for 90 show every 3rd label
+    const step = days > 30 ? 3 : 1;
+    const labels = dailyLabels.filter((_, i) => i % step === 0 || i === dailyLabels.length - 1);
+    return { labels: dailyLabels, startIdx, bucketFn: (dailyData) => dailyData.slice(startIdx) };
+  }
+  if (grouping === 'weeks') {
+    const numWeeks = Math.ceil(days / 7);
+    const labels = [];
+    for (let w = 0; w < numWeeks; w++) {
+      const dayIdx = startIdx + w * 7;
+      labels.push(ALL_DAYS_90[Math.min(dayIdx, ALL_DAYS_90.length - 1)]);
+    }
+    return { labels, startIdx, bucketFn: (dailyData) => {
+      const result = [];
+      for (let w = 0; w < numWeeks; w++) {
+        let sum = 0;
+        for (let d = 0; d < 7; d++) {
+          const idx = startIdx + w * 7 + d;
+          if (idx < dailyData.length) sum += dailyData[idx];
+        }
+        result.push(sum);
+      }
+      return result;
+    }};
+  }
+  if (grouping === 'months') {
+    // Bucket into calendar months within the date range
+    const monthBuckets = {};
+    for (let i = startIdx; i < ALL_DAYS_90.length; i++) {
+      const month = ALL_DAYS_90[i].split(' ')[0];
+      if (!monthBuckets[month]) monthBuckets[month] = [];
+      monthBuckets[month].push(i);
+    }
+    const labels = Object.keys(monthBuckets);
+    return { labels, startIdx, bucketFn: (dailyData) => {
+      return labels.map(m => monthBuckets[m].reduce((s, i) => s + (dailyData[i] || 0), 0));
+    }};
+  }
+  return { labels: dailyLabels, startIdx, bucketFn: (d) => d.slice(startIdx) };
+}
+
+function sumTimeSeriesForUsers(users, field, dateRange, grouping) {
+  const config = getTimeConfig(dateRange, grouping);
+  const perUser = users.map(u => config.bucketFn(USER_DAILY[u]?.[field] || []));
+  const result = new Array(config.labels.length).fill(0);
+  perUser.forEach(series => series.forEach((v, i) => { if (i < result.length) result[i] += v; }));
+  return { labels: config.labels, data: result };
+}
+
+// Populate user dropdowns
+function populateUserDropdowns() {
+  ['usage-user','proj-user','out-user','ag-owner'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    USERS.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; el.appendChild(o); });
+  });
+  // Project filter dropdown on Projects tab
+  const projProjEl = document.getElementById('proj-project');
+  PROJECTS.forEach(p => { const o = document.createElement('option'); o.value = p.name; o.textContent = p.name; projProjEl.appendChild(o); });
+  // Outreach dropdowns are populated dynamically via updateOutreachFilters()
+  // Agent dropdown
+  const agEl = document.getElementById('ag-agent');
+  AGENTS.forEach(a => { const o = document.createElement('option'); o.value = a.name; o.textContent = a.name; agEl.appendChild(o); });
+}
+
+// ══════════════════════════════════════
+// SHARED HELPERS
+// ══════════════════════════════════════
+const P = '#7B2CBF', LP = '#B84BEE', R = '#dc2626', G = '#16a34a', GR = '#E5E5E5';
+let charts = {};
+
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+const chartOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: { x: { grid: { display:false }, ticks: { font:{size:11}, color:'#999' } }, y: { grid: { color:'#F0F0F0' }, ticks: { font:{size:11}, color:'#999' }, beginAtZero:true } }
+};
+
+// Metric definitions — tooltips for KPI cards and table headers
+const METRIC_TIPS = {
+  // Usage outcomes
+  'Interested Replies': 'Candidates who replied positively to outreach — expressing interest in the role or wanting to learn more.',
+  'Candidates Contacted': 'Unique candidates who received at least one outreach email through a sequence.',
+  'Interest Rate': 'Interested replies ÷ candidates contacted. The primary measure of outreach effectiveness.',
+  'Candidates Exported to ATS': 'Candidates exported to your applicant tracking system via CSV, PDF, or direct integration.',
+  // Usage activity
+  'Active Users': 'Team members who performed at least one meaningful action (search, review, or outreach) in this period.',
+  'Searches Run': 'Total AI-powered candidate searches executed across all users.',
+  'Profiles Reviewed': 'Candidate profiles viewed in detail — from search results or agent recommendations.',
+  'Contacts Revealed': 'Contact credits used to reveal candidate email addresses or phone numbers.',
+  'Agents Active': 'AI sourcing agents currently running and finding candidates autonomously.',
+  // Projects
+  'Active Projects': 'Hiring projects currently in progress (not paused or completed).',
+  'Avg. Time to First Outreach': 'Average days from project creation to first outreach email sent.',
+  'Avg. Interested Rate': 'Average interest rate across all filtered projects.',
+  'Pipeline Candidates': 'Total candidates shortlisted across all filtered projects.',
+  // Outreach
+  'Total Runs': 'Total outreach sequences initiated — both manually by recruiters and automatically by agents, across all channels.',
+  'Open Rate': 'Percentage of sent messages that were opened. Applicable to email; not tracked for SMS or InMail.',
+  'Click Rate': 'Percentage of sent messages where the recipient clicked a link.',
+  'Reply Rate': 'Percentage of sent messages that received any reply, across all channels.',
+  'Bounce Rate': 'Percentage of sent messages that bounced or failed to deliver.',
+  // Agents
+  'Profiles Found': 'Total candidate profiles discovered by agents matching your search criteria.',
+  'Approval Rate': 'Percentage of agent-recommended profiles that were approved during calibration review.',
+  'Avg. Calibration Rounds': 'Average number of feedback rounds before the agent consistently matches your preferences.',
+  'Agent Interested Rate': 'Interest rate for candidates sourced by agents, compared to manually sourced candidates.',
+  // Table headers
+  'Searches': 'Total AI-powered searches run by this recruiter.',
+  'Reviewed': 'Candidate profiles viewed in detail.',
+  'Shortlisted': 'Candidates added to a project shortlist.',
+  'Contacted': 'Candidates who received outreach.',
+  'Interested': 'Candidates who replied with positive interest.',
+  'Interest Rate': 'Interested replies ÷ candidates contacted.',
+  'Contacts Revealed': 'Contact credits used to reveal email/phone.',
+  'Found': 'Candidate profiles discovered by search or agent.',
+  'Replied': 'Candidates who replied to outreach (any sentiment).',
+  'Interested %': 'Interested replies ÷ candidates contacted.',
+  'Velocity': 'Days from project creation to first outreach email.',
+  'Total': 'Total outreach sequences initiated.',
+  'Active': 'Sequences currently in progress (not completed).',
+  'Opened': 'Emails opened by the recipient.',
+  'Clicked': 'Emails where a link was clicked.',
+  'Bounced': 'Emails that failed to deliver.',
+  'Approval Rate': 'Percentage of agent recommendations approved in calibration.',
+};
+
+function tip(label) {
+  const text = METRIC_TIPS[label];
+  if (!text) return '';
+  return `<span class="tip-text">${text}</span>`;
+}
+
+function kpi(label, value, prev, unit='', pp=false) {
+  const pct = pp ? (value - prev).toFixed(1) + 'pp' : prev > 0 ? ((value/prev-1)*100).toFixed(0) + '%' : '—';
+  const dir = value >= prev ? 'up' : 'down';
+  const sign = value >= prev ? '+' : '';
+  const isOutcome = ['Interested Replies','Candidates Contacted','Interest Rate','Candidates Exported to ATS'].includes(label);
+  return `<div class="kpi-card${isOutcome ? '" style="border-left:3px solid #7B2CBF' : ''}"><div class="kpi-label has-tip">${label}${tip(label)}</div><div class="kpi-value">${typeof value==='number'&&!pp ? value.toLocaleString() : value}${unit}</div><div class="kpi-change ${dir}" title="vs prior period">${sign}${pct} <span class="kpi-prev">from ${typeof prev==='number'&&!pp ? prev.toLocaleString() : prev}${pp?'%':''}</span></div></div>`;
+}
+
+function rateColor(r) { return r >= 15 ? G : r >= 10 ? '#D97706' : '#dc2626'; }
+function statusBadge(s) { const c = s==='Active'?'active':s==='Paused'?'paused':'completed'; return `<span class="status-badge status-${c}">${s}</span>`; }
+
+function sumField(data, field) { return data.reduce((s,d) => s + (d[field]||0), 0); }
+// Legacy helper removed — using sumTimeSeriesForUsers instead
+
+// ══════════════════════════════════════
+// USAGE TAB
+// ══════════════════════════════════════
+let usageSortCol = 'interested', usageSortDir = 'desc';
+let projSortCol = 'interested', projSortDir = 'desc';
+let outSortCol = 'total', outSortDir = 'desc';
+let agSortCol = 'found', agSortDir = 'desc';
+
+function renderUsage() {
+  if (currentMode === 'empty') return;
+  const dateMult = DATE_MULT[document.getElementById('usage-date').value];
+  const prevMult = PREV_MULT[document.getElementById('usage-date').value];
+  const userFilter = document.getElementById('usage-user').value;
+  const users = userFilter === 'all' ? USERS : [userFilter];
+  const data = users.map(u => USER_DATA[u]);
+
+  const tot = (f) => Math.round(sumField(data, f) * dateMult);
+  const prev = (f) => Math.round(sumField(data, f) * dateMult * prevMult);
+
+  const interested = tot('interested'), prevInterested = prev('interested');
+  const contacted = tot('contacted'), prevContacted = prev('contacted');
+  const rate = contacted > 0 ? (interested/contacted*100) : 0;
+  const prevRate = prevContacted > 0 ? (prevInterested/prevContacted*100) : 0;
+  const exported = tot('exports'), prevExported = prev('exports');
+
+  document.getElementById('usage-kpis-outcome').innerHTML =
+    kpi('Interested Replies', interested, prevInterested) +
+    kpi('Candidates Contacted', contacted, prevContacted) +
+    kpi('Interest Rate', rate.toFixed(1)+'%', prevRate.toFixed(1), '', true) +
+    kpi('Candidates Exported to ATS', exported, prevExported);
+
+  const activeUsers = users.filter(u => USER_DATA[u].searches > 5).length;
+  const prevActiveUsers = Math.max(1, activeUsers - (userFilter==='all'?1:0));
+  document.getElementById('usage-kpis-activity').innerHTML =
+    `<div class="kpi-card"><div class="kpi-label has-tip">Active Users${tip('Active Users')}</div><div class="kpi-value">${activeUsers}<span style="font-size:14px;color:#999;font-weight:400"> / ${users.length}</span></div><div class="kpi-change up" title="vs prior period">+${activeUsers-prevActiveUsers} <span class="kpi-prev">from ${prevActiveUsers}</span></div></div>` +
+    kpi('Searches Run', tot('searches'), prev('searches')) +
+    kpi('Profiles Reviewed', tot('reviewed'), prev('reviewed')) +
+    kpi('Contacts Revealed', tot('contacts'), prev('contacts')) +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Agents Active${tip('Agents Active')}</div><div class="kpi-value">${sumField(data,'agentsActive')}</div></div>`;
+
+  // Plan usage section
+  const totalContacts = sumField(data, 'contacts');
+  const totalExports = sumField(data, 'exports');
+  const contactLimit = 1000; // Growth plan
+  const exportLimit = 1000;
+  const contactPct = Math.min(100, (totalContacts / contactLimit * 100));
+  const exportPct = Math.min(100, (totalExports / exportLimit * 100));
+  const daysInPeriod = 30;
+  const daysElapsed = 22; // mock: 22 days into billing period
+  const daysRemaining = daysInPeriod - daysElapsed;
+  const contactDailyRate = totalContacts / daysElapsed;
+  const projectedContacts = Math.round(contactDailyRate * daysInPeriod);
+  const contactsPerInterested = interested > 0 ? (totalContacts / interested).toFixed(0) : '—';
+  const barColor = (pct) => pct > 90 ? '#dc2626' : pct > 70 ? '#D97706' : '#7B2CBF';
+
+  // Top credit consumers
+  const usersByContacts = users.map(u => ({ name: u, contacts: Math.round(USER_DATA[u].contacts * dateMult) })).sort((a,b) => b.contacts - a.contacts);
+  const top3 = usersByContacts.slice(0, 3);
+
+  document.getElementById('usage-plan-cards').innerHTML =
+    `<div class="plan-card">
+      <div class="plan-card-header"><div class="plan-card-title">Contact credits (email/phone)</div><div class="plan-card-usage">${totalContacts.toLocaleString()} / ${contactLimit.toLocaleString()}</div></div>
+      <div class="plan-bar"><div class="plan-bar-fill" style="width:${contactPct}%;background:${barColor(contactPct)}"></div></div>
+      <div class="plan-detail">At current pace, projected to use <strong>${projectedContacts.toLocaleString()}</strong> by end of period${projectedContacts > contactLimit ? ' — <strong style="color:#dc2626">over limit</strong>' : ''}<br>${daysRemaining} days remaining</div>
+    </div>` +
+    `<div class="plan-card">
+      <div class="plan-card-header"><div class="plan-card-title">Export credits (CSV/PDF)</div><div class="plan-card-usage">${totalExports.toLocaleString()} / ${exportLimit.toLocaleString()}</div></div>
+      <div class="plan-bar"><div class="plan-bar-fill" style="width:${exportPct}%;background:${exportPct > 90 ? '#dc2626' : exportPct > 70 ? '#D97706' : '#B84BEE'}"></div></div>
+      <div class="plan-detail">${daysRemaining} days remaining</div>
+    </div>`;
+
+  // Charts
+  const grouping = document.getElementById('usage-group').value;
+  const dateRange = document.getElementById('usage-date').value;
+  const tsContacts = sumTimeSeriesForUsers(users, 'contacts', dateRange, grouping);
+  const tsExports = sumTimeSeriesForUsers(users, 'exports', dateRange, grouping);
+  const tsSearches = sumTimeSeriesForUsers(users, 'searches', dateRange, grouping);
+  const tsReviewed = sumTimeSeriesForUsers(users, 'reviewed', dateRange, grouping);
+  const tsShortlisted = sumTimeSeriesForUsers(users, 'shortlisted', dateRange, grouping);
+  const tsContacted = sumTimeSeriesForUsers(users, 'contacted', dateRange, grouping);
+
+  destroyChart('usage-credits-chart');
+  charts['usage-credits-chart'] = new Chart(document.getElementById('usage-credits-chart'), { type:'bar', data:{ labels:tsContacts.labels, datasets:[{ data:tsContacts.data, backgroundColor:P, borderRadius:4, barPercentage:0.65 }] }, options:chartOpts });
+
+  destroyChart('usage-exports-chart');
+  charts['usage-exports-chart'] = new Chart(document.getElementById('usage-exports-chart'), { type:'bar', data:{ labels:tsExports.labels, datasets:[{ data:tsExports.data, backgroundColor:LP, borderRadius:4, barPercentage:0.65 }] }, options:chartOpts });
+
+  const smallPt = tsSearches.data.length > 30 ? 0 : 4;
+  destroyChart('usage-activity-chart');
+  charts['usage-activity-chart'] = new Chart(document.getElementById('usage-activity-chart'), { type:'line', data:{ labels:tsSearches.labels, datasets:[
+    { label:'Searches', data:tsSearches.data, borderColor:P, backgroundColor:'rgba(123,44,191,0.06)', fill:true, tension:0.3, pointRadius:smallPt },
+    { label:'Reviewed', data:tsReviewed.data, borderColor:LP, fill:false, tension:0.3, pointRadius:smallPt },
+    { label:'Shortlisted', data:tsShortlisted.data, borderColor:G, fill:false, tension:0.3, pointRadius:smallPt },
+    { label:'Contacted', data:tsContacted.data, borderColor:'#D97706', fill:false, tension:0.3, pointRadius:smallPt },
+  ]}, options:chartOpts });
+
+  // Table
+  renderUsageTable(users, dateMult);
+}
+
+function renderUsageTable(users, mult) {
+  const rows = users.map(u => {
+    const d = USER_DATA[u];
+    const m = (f) => Math.round(d[f] * mult);
+    const cont = m('contacted'), intr = m('interested');
+    return { name:u, searches:m('searches'), reviewed:m('reviewed'), shortlisted:m('shortlisted'), contacted:cont, interested:intr, rate: cont>0 ? +(intr/cont*100).toFixed(1) : 0, contacts:m('contacts'), exports:m('exports') };
+  });
+  rows.sort((a,b) => usageSortDir==='desc' ? b[usageSortCol]-a[usageSortCol] : a[usageSortCol]-b[usageSortCol]);
+  document.getElementById('usage-table-body').innerHTML = rows.map(p =>
+    `<tr><td style="font-weight:500">${p.name}</td><td style="font-weight:600">${p.interested}</td><td style="font-weight:600;color:#333">${p.rate}%</td><td>${p.contacted}</td><td>${p.searches}</td><td>${p.reviewed.toLocaleString()}</td><td>${p.shortlisted}</td><td>${p.contacts}</td><td>${p.exports}</td></tr>`
+  ).join('');
+}
+
+// ══════════════════════════════════════
+// PROJECTS TAB
+// ══════════════════════════════════════
+function renderProjects() {
+  if (currentMode === 'empty') return;
+  const userFilter = document.getElementById('proj-user').value;
+  const statusFilter = document.getElementById('proj-status').value;
+  const projectFilter = document.getElementById('proj-project').value;
+  let filtered = PROJECTS.filter(p => (userFilter==='all' || p.user===userFilter) && (statusFilter==='all' || p.status===statusFilter) && (projectFilter==='all' || p.name===projectFilter));
+
+  const active = filtered.filter(p=>p.status==='Active').length;
+  const paused = filtered.filter(p=>p.status==='Paused').length;
+  const completed = filtered.filter(p=>p.status==='Completed').length;
+  const avgVelocity = filtered.length > 0 ? (filtered.reduce((s,p)=>s+p.velocity,0)/filtered.length).toFixed(1) : '—';
+  const totContacted = sumField(filtered,'contacted');
+  const totInterested = sumField(filtered,'interested');
+  const avgRate = totContacted > 0 ? (totInterested/totContacted*100).toFixed(1) : '0.0';
+  const pipeline = sumField(filtered,'shortlisted');
+
+  document.getElementById('proj-kpis').innerHTML =
+    `<div class="kpi-card"><div class="kpi-label has-tip">Active Projects${tip('Active Projects')}</div><div class="kpi-value">${active}</div><div class="kpi-sub">${paused} paused, ${completed} completed</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Avg. Interested Rate${tip('Avg. Interested Rate')}</div><div class="kpi-value">${avgRate}%</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Pipeline Candidates${tip('Pipeline Candidates')}</div><div class="kpi-value">${pipeline}</div></div>`;
+
+  document.getElementById('proj-funnel-title').textContent = `Sourcing funnel${userFilter!=='all' ? ' — '+userFilter : ''}${statusFilter!=='all' ? ' ('+statusFilter+')' : ''}`;
+
+  const funnelData = ['found','reviewed','shortlisted','contacted','replied','interested'].map(f => sumField(filtered, f));
+  destroyChart('projects-funnel-chart');
+  charts['projects-funnel-chart'] = new Chart(document.getElementById('projects-funnel-chart'), { type:'bar', data:{ labels:['Found','Reviewed','Shortlisted','Contacted','Replied','Interested'], datasets:[{ data:funnelData, backgroundColor:['rgba(123,44,191,0.15)','rgba(123,44,191,0.28)','rgba(123,44,191,0.42)','rgba(123,44,191,0.58)','rgba(123,44,191,0.78)',P], borderRadius:6, barPercentage:0.7 }] }, options:{...chartOpts, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex; const pct=i>0?((funnelData[i]/funnelData[i-1])*100).toFixed(1)+'% conversion':'100%'; return `${ctx.parsed.y.toLocaleString()} (${pct})`;}}}}} });
+
+  const projRows = filtered.map(p => ({
+    ...p, iRate: p.contacted > 0 ? +(p.interested/p.contacted*100).toFixed(1) : 0
+  }));
+  projRows.sort((a,b) => {
+    const av = a[projSortCol], bv = b[projSortCol];
+    if (typeof av === 'string') return projSortDir==='desc' ? bv.localeCompare(av) : av.localeCompare(bv);
+    return projSortDir==='desc' ? bv-av : av-bv;
+  });
+  document.getElementById('proj-table-body').innerHTML = projRows.map(p =>
+    `<tr><td style="font-weight:600">${p.name}</td><td>${p.user}</td><td>${statusBadge(p.status)}</td><td>${p.found}</td><td>${p.reviewed}</td><td>${p.shortlisted}</td><td>${p.contacted}</td><td>${p.replied}</td><td>${p.interested}</td><td style="font-weight:600;color:#333">${p.iRate}%</td></tr>`
+  ).join('');
+}
+
+// ══════════════════════════════════════
+// OUTREACH TAB
+// ══════════════════════════════════════
+// Cascading filter logic: each filter narrows what's available in the others
+function updateOutreachFilters() {
+  const userFilter = document.getElementById('out-user').value;
+  const seqFilter = document.getElementById('out-seq').value;
+  const projFilter = document.getElementById('out-proj').value;
+  const channelFilter = document.getElementById('out-channel').value;
+  const inboxFilter = document.getElementById('out-inbox').value;
+
+  // Get runs matching current global filter (user) to determine available options
+  let baseRuns = OUTREACH_RUNS;
+  if (userFilter !== 'all') baseRuns = baseRuns.filter(r => r.user === userFilter);
+
+  // Rebuild each dropdown with options valid given OTHER active filters
+  function rebuildSelect(id, currentVal, optionsFn) {
+    const el = document.getElementById(id);
+    const opts = optionsFn();
+    const allLabel = el.options[0].textContent; // preserve "All X" label
+    el.innerHTML = '';
+    const allOpt = document.createElement('option');
+    allOpt.value = 'all'; allOpt.textContent = allLabel;
+    el.appendChild(allOpt);
+    opts.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; el.appendChild(o); });
+    // Restore selection if still valid
+    if (opts.includes(currentVal)) el.value = currentVal;
+    else el.value = 'all';
+  }
+
+  // Each filter considers the others
+  const runsForSeqOpts = baseRuns.filter(r => (projFilter==='all'||r.project===projFilter) && (channelFilter==='all'||r.channel===channelFilter) && (inboxFilter==='all'||SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox===inboxFilter));
+  rebuildSelect('out-seq', seqFilter, () => [...new Set(runsForSeqOpts.map(r => r.seq))].sort());
+
+  const runsForProjOpts = baseRuns.filter(r => (seqFilter==='all'||r.seq===seqFilter) && (channelFilter==='all'||r.channel===channelFilter) && (inboxFilter==='all'||SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox===inboxFilter));
+  rebuildSelect('out-proj', projFilter, () => [...new Set(runsForProjOpts.map(r => r.project))].sort());
+
+  const runsForChannelOpts = baseRuns.filter(r => (seqFilter==='all'||r.seq===seqFilter) && (projFilter==='all'||r.project===projFilter) && (inboxFilter==='all'||SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox===inboxFilter));
+  rebuildSelect('out-channel', channelFilter, () => [...new Set(runsForChannelOpts.map(r => r.channel))].sort());
+
+  const runsForInboxOpts = baseRuns.filter(r => (seqFilter==='all'||r.seq===seqFilter) && (projFilter==='all'||r.project===projFilter) && (channelFilter==='all'||r.channel===channelFilter));
+  const inboxes = [...new Set(runsForInboxOpts.map(r => SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox).filter(Boolean))].sort();
+  rebuildSelect('out-inbox', inboxFilter, () => inboxes);
+}
+
+function getFilteredRuns() {
+  const userFilter = document.getElementById('out-user').value;
+  const seqFilter = document.getElementById('out-seq').value;
+  const projFilter = document.getElementById('out-proj').value;
+  const channelFilter = document.getElementById('out-channel').value;
+  const inboxFilter = document.getElementById('out-inbox').value;
+
+  return OUTREACH_RUNS.filter(r =>
+    (userFilter==='all' || r.user===userFilter) &&
+    (seqFilter==='all' || r.seq===seqFilter) &&
+    (projFilter==='all' || r.project===projFilter) &&
+    (channelFilter==='all' || r.channel===channelFilter) &&
+    (inboxFilter==='all' || SEQUENCE_DEFS.find(s=>s.name===r.seq)?.inbox===inboxFilter)
+  );
+}
+
+function renderOutreach() {
+  if (currentMode === 'empty') return;
+
+  // Update cascading filters first
+  updateOutreachFilters();
+
+  const filtered = getFilteredRuns();
+
+  const total = sumField(filtered,'total');
+  const opened = sumField(filtered,'opened');
+  const clicked = sumField(filtered,'clicked');
+  const replied = sumField(filtered,'replied');
+  const interested = sumField(filtered,'interested');
+  const bounced = sumField(filtered,'bounced');
+  const pct = (n) => total > 0 ? (n/total*100).toFixed(1) : '0.0';
+
+  // Determine if filtered runs include any email — open/click only apply to email
+  const channels = new Set(filtered.map(r => r.channel));
+  const hasEmail = channels.has('email');
+  const emailOnly = channels.size === 1 && hasEmail;
+  const noEmail = !hasEmail;
+  // For open/click, compute against email runs only (those are the only ones that track it)
+  const emailRuns = filtered.filter(r => r.channel === 'email');
+  const emailTotal = sumField(emailRuns, 'total');
+  const pctEmail = (n) => emailTotal > 0 ? (n/emailTotal*100).toFixed(1) : '0.0';
+
+  const openVal = noEmail ? 'N/A' : `${pctEmail(sumField(emailRuns,'opened'))}%`;
+  const openSub = noEmail ? 'Not tracked for this channel' : emailOnly ? `(${sumField(emailRuns,'opened')}/${emailTotal})` : `(${sumField(emailRuns,'opened')}/${emailTotal} email only)`;
+  const clickVal = noEmail ? 'N/A' : `${pctEmail(sumField(emailRuns,'clicked'))}%`;
+  const clickSub = noEmail ? 'Not tracked for this channel' : emailOnly ? `(${sumField(emailRuns,'clicked')}/${emailTotal})` : `(${sumField(emailRuns,'clicked')}/${emailTotal} email only)`;
+
+  document.getElementById('out-kpis').innerHTML =
+    `<div class="kpi-card"><div class="kpi-label has-tip">Total Runs${tip('Total Runs')}</div><div class="kpi-value">${total.toLocaleString()}</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Open Rate${tip('Open Rate')}</div><div class="kpi-value">${openVal}</div><div class="kpi-sub">${openSub}</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Click Rate${tip('Click Rate')}</div><div class="kpi-value">${clickVal}</div><div class="kpi-sub">${clickSub}</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Reply Rate${tip('Reply Rate')}</div><div class="kpi-value">${pct(replied)}%</div><div class="kpi-sub">(${replied}/${total})</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Interest Rate${tip('Interest Rate')}</div><div class="kpi-value">${pct(interested)}%</div><div class="kpi-sub">(${interested}/${total})</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Bounce Rate${tip('Bounce Rate')}</div><div class="kpi-value">${pct(bounced)}%</div><div class="kpi-sub">(${bounced}/${total})</div></div>`;
+
+  // Charts — scale time series based on filtered proportion
+  const outGrouping = document.getElementById('out-group').value;
+  const allTotal = sumField(OUTREACH_RUNS, 'total');
+  const scale = allTotal > 0 ? total / allTotal : 0;
+
+  const monthLabels = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  const baseUserRuns = [12,18,24,32,28,38,42,56,64,72,68,78];
+  const baseAgentRuns = [0,0,0,0,4,8,14,22,30,38,42,52];
+  const baseSent = [45,68,92,120,134,156,178,210,245,280,265,310];
+  const baseScheduled = [8,12,18,24,20,28,32,38,42,48,44,56];
+
+  let outLabels, userRuns, agentRuns, sent, scheduled;
+  if (outGrouping === 'months') {
+    outLabels = monthLabels;
+    userRuns = baseUserRuns.map(v => Math.round(v * scale));
+    agentRuns = baseAgentRuns.map(v => Math.round(v * scale));
+    sent = baseSent.map(v => Math.round(v * scale));
+    scheduled = baseScheduled.map(v => Math.round(v * scale));
+  } else {
+    outLabels = ['W1 Jan','W2 Jan','W3 Jan','W4 Jan','W1 Feb','W2 Feb','W3 Feb','W4 Feb','W1 Mar','W2 Mar','W3 Mar','W4 Mar'];
+    const expandToWeeks = (monthly3) => {
+      const last3 = monthly3.slice(-3);
+      return last3.flatMap(v => { const w = v/4; return [0.8,1.1,1.2,0.9].map(j => Math.round(w * j * scale)); });
+    };
+    userRuns = expandToWeeks(baseUserRuns);
+    agentRuns = expandToWeeks(baseAgentRuns);
+    sent = expandToWeeks(baseSent);
+    scheduled = expandToWeeks(baseScheduled);
+  }
+
+  destroyChart('outreach-runs-chart');
+  charts['outreach-runs-chart'] = new Chart(document.getElementById('outreach-runs-chart'), { type:'bar', data:{ labels:outLabels, datasets:[{ label:'User', data:userRuns, backgroundColor:'#F67E7D', borderRadius:4, barPercentage:0.5 },{ label:'Agent', data:agentRuns, backgroundColor:'#7B2CBF', borderRadius:4, barPercentage:0.5 }]}, options:chartOpts });
+
+  destroyChart('outreach-emails-chart');
+  charts['outreach-emails-chart'] = new Chart(document.getElementById('outreach-emails-chart'), { type:'line', data:{ labels:outLabels, datasets:[{ label:'Sent', data:sent, borderColor:'#7B2CBF', tension:0.3, pointRadius:3, fill:false },{ label:'Scheduled', data:scheduled, borderColor:'#4CC9A0', tension:0.3, pointRadius:3, fill:false }]}, options:chartOpts });
+
+  // Cache aggregated rows for the table, then render via separate paginated function
+  window._outreachSeqRows = buildSeqRows(filtered);
+  outPage = 0; // reset to first page on filter change
+  renderOutreachTable();
+}
+
+// Aggregate runs into sequence rows
+function buildSeqRows(runs) {
+  const seqGroups = {};
+  runs.forEach(r => {
+    if (!seqGroups[r.seq]) seqGroups[r.seq] = { seq:r.seq, total:0, active:0, opened:0, clicked:0, replied:0, interested:0, bounced:0, projects:new Set(), channels:new Set(), users:new Set() };
+    const g = seqGroups[r.seq];
+    g.total += r.total; g.active += r.active; g.opened += r.opened;
+    g.clicked += r.clicked; g.replied += r.replied; g.interested += r.interested; g.bounced += r.bounced;
+    g.projects.add(r.project); g.channels.add(r.channel); g.users.add(r.user);
+  });
+  return Object.values(seqGroups).sort((a,b) => b.total - a.total);
+}
+
+const OUT_PAGE_SIZE = 10;
+let outPage = 0;
+
+function renderOutreachTable() {
+  const rows = window._outreachSeqRows || [];
+  const search = (document.getElementById('out-table-search')?.value || '').toLowerCase();
+
+  // Filter by search
+  const filtered = search ? rows.filter(s => s.seq.toLowerCase().includes(search) || [...s.users].some(u => u.toLowerCase().includes(search)) || [...s.projects].some(p => p.toLowerCase().includes(search))) : rows;
+
+  // Add computed interestRate for sorting
+  filtered.forEach(s => { s.interestRate = s.total > 0 ? +(s.interested/s.total*100).toFixed(1) : 0; s.owner = [...s.users].join(', '); });
+
+  // Sort
+  filtered.sort((a,b) => {
+    const av = a[outSortCol], bv = b[outSortCol];
+    if (typeof av === 'string') return outSortDir==='desc' ? (bv||'').localeCompare(av||'') : (av||'').localeCompare(bv||'');
+    return outSortDir==='desc' ? (bv||0)-(av||0) : (av||0)-(bv||0);
+  });
+
+  // Paginate
+  const totalPages = Math.max(1, Math.ceil(filtered.length / OUT_PAGE_SIZE));
+  if (outPage >= totalPages) outPage = totalPages - 1;
+  const start = outPage * OUT_PAGE_SIZE;
+  const page = filtered.slice(start, start + OUT_PAGE_SIZE);
+
+  document.getElementById('out-table-body').innerHTML = page.map(s => {
+    const def = SEQUENCE_DEFS.find(d => d.name === s.seq);
+    const pctOf = (n) => s.total>0 ? (n/s.total*100).toFixed(1)+'%' : '—';
+    const seqHasEmail = s.channels.has('email');
+
+    // Channel badges inline with name
+    const badges = [...s.channels].map(c => `<span class="ch-badge ${c}">${c}</span>`).join(' ');
+
+    // Owner column
+    const ownerCell = [...s.users].join(', ');
+
+    // Projects column — show names, truncate at 2 with "+N more" tooltip
+    const projArr = [...s.projects];
+    let projCell;
+    if (projArr.length <= 2) {
+      projCell = `<span style="color:#B84BEE;font-size:12px">${projArr.join(', ')}</span>`;
+    } else {
+      const shown = projArr.slice(0,2).join(', ');
+      const rest = projArr.slice(2);
+      projCell = `<span style="color:#B84BEE;font-size:12px">${shown}, </span><span class="proj-count" style="font-size:12px">+${rest.length} more<span class="proj-tooltip">${rest.join('<br>')}</span></span>`;
+    }
+
+    const openedCell = seqHasEmail ? `${s.opened} <span style="font-size:11px;color:#999">${pctOf(s.opened)}</span>` : `<span style="color:#999">N/A</span>`;
+    const clickedCell = seqHasEmail ? `${s.clicked} <span style="font-size:11px;color:#999">${pctOf(s.clicked)}</span>` : `<span style="color:#999">N/A</span>`;
+
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap">${s.seq} ${badges}</td>
+      <td style="color:#555">${ownerCell}</td>
+      <td>${projCell}</td>
+      <td>${s.total}</td>
+      <td>${s.active} <span style="font-size:11px;color:#999">${pctOf(s.active)}</span></td>
+      <td>${openedCell}</td>
+      <td>${clickedCell}</td>
+      <td>${s.replied} <span style="font-size:11px;color:#999">${pctOf(s.replied)}</span></td>
+      <td>${s.interested}</td>
+      <td style="font-weight:600">${pctOf(s.interested)}</td>
+      <td>${s.bounced} <span style="font-size:11px;color:#999">${pctOf(s.bounced)}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Pagination controls
+  const pagEl = document.getElementById('out-table-pagination');
+  if (filtered.length <= OUT_PAGE_SIZE) {
+    pagEl.innerHTML = `<span>${filtered.length} sequence${filtered.length!==1?'s':''}</span><span></span>`;
+  } else {
+    pagEl.innerHTML = `<span>Showing ${start+1}–${Math.min(start+OUT_PAGE_SIZE, filtered.length)} of ${filtered.length} sequences</span>
+      <span>
+        <button class="pagination-btn" onclick="outPage=Math.max(0,outPage-1);renderOutreachTable()" ${outPage===0?'disabled':''}>← Prev</button>
+        <span style="margin:0 8px;font-size:12px;color:#555">Page ${outPage+1} of ${totalPages}</span>
+        <button class="pagination-btn" onclick="outPage=Math.min(${totalPages-1},outPage+1);renderOutreachTable()" ${outPage>=totalPages-1?'disabled':''}>Next →</button>
+      </span>`;
+  }
+}
+
+// ══════════════════════════════════════
+// AGENTS TAB
+// ══════════════════════════════════════
+function renderAgents() {
+  if (currentMode === 'empty') return;
+  const ownerFilter = document.getElementById('ag-owner').value;
+  const agentFilter = document.getElementById('ag-agent').value;
+  const statusFilter = document.getElementById('ag-status').value;
+  let filtered = AGENTS.filter(a =>
+    (ownerFilter==='all' || a.owner===ownerFilter) &&
+    (agentFilter==='all' || a.name===agentFilter) &&
+    (statusFilter==='all' || a.status===statusFilter)
+  );
+
+  const totalFound = sumField(filtered,'found');
+  const totalShortlisted = sumField(filtered,'shortlisted');
+  const totalContacted = sumField(filtered,'contacted');
+  const totalInterested = sumField(filtered,'interested');
+  const avgApproval = filtered.length > 0 ? (filtered.reduce((s,a)=>s+a.approvalRate,0)/filtered.length).toFixed(1) : '0';
+  const intRate = totalContacted > 0 ? (totalInterested/totalContacted*100).toFixed(1) : '0';
+
+  document.getElementById('ag-kpis').innerHTML =
+    `<div class="kpi-card"><div class="kpi-label has-tip">Active Agents${tip('Agents Active')}</div><div class="kpi-value">${filtered.filter(a=>a.status==='Active').length}</div><div class="kpi-sub">${filtered.filter(a=>a.status==='Paused').length} paused</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Profiles Found${tip('Profiles Found')}</div><div class="kpi-value">${totalFound.toLocaleString()}</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Approval Rate${tip('Approval Rate')}</div><div class="kpi-value">${avgApproval}%</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Avg. Calibration Rounds${tip('Avg. Calibration Rounds')}</div><div class="kpi-value">2.1</div></div>` +
+    `<div class="kpi-card"><div class="kpi-label has-tip">Agent Interested Rate${tip('Agent Interested Rate')}</div><div class="kpi-value">${intRate}%</div><div class="kpi-sub">vs 7.8% manual</div></div>`;
+
+  const agGrouping = document.getElementById('ag-group').value;
+  const agDateRange = document.getElementById('ag-date').value;
+  const scale = filtered.length / AGENTS.length;
+
+  // Use the same getTimeConfig system — generate agent-level daily data and bucket it
+  const agConfig = getTimeConfig(agDateRange, agGrouping);
+  const agLabels = agConfig.labels;
+
+  // Generate daily agent data (90 days) from base weekly, then bucket
+  const baseWeeklyFound = [380,520,610,480];
+  const baseWeeklyApproved = [245,362,430,338];
+  const baseWeeklyRejected = [135,158,180,142];
+
+  function agentDailyFromWeekly(weeklyBase) {
+    const dailyAvg = weeklyBase.reduce((a,b)=>a+b,0) / 28 * scale;
+    const rng = seededRandom(weeklyBase[0] * 7 + 13);
+    return ALL_DAYS_90.map((_, i) => {
+      const dow = i % 7;
+      const weekendMult = dow >= 5 ? 0.2 : 1.15;
+      return Math.max(0, Math.round(dailyAvg * weekendMult * (0.5 + rng())));
+    });
+  }
+
+  function regroup(baseWeekly) {
+    const daily = agentDailyFromWeekly(baseWeekly);
+    return agConfig.bucketFn(daily);
+  }
+
+  destroyChart('agents-activity-chart');
+  charts['agents-activity-chart'] = new Chart(document.getElementById('agents-activity-chart'), { type:'bar', data:{ labels:agLabels, datasets:[{ label:'Found', data:regroup(baseWeeklyFound), backgroundColor:P, borderRadius:4, barPercentage:0.5 },{ label:'Approved', data:regroup(baseWeeklyApproved), backgroundColor:G, borderRadius:4, barPercentage:0.5 },{ label:'Rejected', data:regroup(baseWeeklyRejected), backgroundColor:R, borderRadius:4, barPercentage:0.5 }]}, options:chartOpts });
+
+  destroyChart('agents-quality-chart');
+  charts['agents-quality-chart'] = new Chart(document.getElementById('agents-quality-chart'), { type:'bar', data:{ labels:['Reply Rate','Interest Rate','Approval Rate','Shortlist Rate'], datasets:[{ label:'Agent', data:[15.8,+intRate,+avgApproval,72.4], backgroundColor:P, borderRadius:4, barPercentage:0.5 },{ label:'Manual', data:[13.4,7.8,100,58.6], backgroundColor:'#DDD', borderRadius:4, barPercentage:0.5 }]}, options:{...chartOpts, scales:{...chartOpts.scales, y:{...chartOpts.scales.y, ticks:{...chartOpts.scales.y.ticks, callback:v=>v+'%'}}}} });
+
+  const agRows = filtered.map(a => ({
+    ...a, iRate: a.contacted > 0 ? +(a.interested/a.contacted*100).toFixed(1) : 0
+  }));
+  agRows.sort((a,b) => {
+    const av = a[agSortCol], bv = b[agSortCol];
+    if (typeof av === 'string') return agSortDir==='desc' ? bv.localeCompare(av) : av.localeCompare(bv);
+    return agSortDir==='desc' ? bv-av : av-bv;
+  });
+  document.getElementById('ag-table-body').innerHTML = agRows.map(a =>
+    `<tr><td style="font-weight:600">${a.name}</td><td>${a.owner}</td><td>${statusBadge(a.status)}</td><td>${a.found}</td><td><div class="progress-bar"><div class="progress-fill" style="width:${a.approvalRate}%"></div></div>${a.approvalRate}%</td><td>${a.shortlisted}</td><td>${a.contacted}</td><td>${a.interested}</td><td style="font-weight:600;color:#333">${a.iRate}%</td></tr>`
+  ).join('');
+}
+
+// ══════════════════════════════════════
+// TAB / MODE SWITCHING
+// ══════════════════════════════════════
+let currentTab = 'usage', currentMode = 'populated';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  document.querySelectorAll('.analytics-tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+  document.querySelectorAll('#analytics-subnav .sidebar-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+  const titles = { usage:'Usage', projects:'Projects', outreach:'Outreach', agents:'Agents' };
+  document.getElementById('page-title').textContent = titles[tab];
+  document.getElementById('breadcrumb-tab').textContent = titles[tab];
+  applyMode();
+  renderCurrentTab();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.toggle('active', btn.textContent.toLowerCase().includes(mode==='populated'?'data':'empty')));
+  applyMode();
+  if (mode === 'populated') renderCurrentTab();
+}
+
+function applyMode() {
+  const tab = document.getElementById('tab-' + currentTab);
+  tab.querySelectorAll('.state-populated').forEach(el => el.classList.toggle('hidden', currentMode==='empty'));
+  tab.querySelectorAll('.state-empty').forEach(el => el.classList.toggle('hidden', currentMode==='populated'));
+}
+
+function renderCurrentTab() {
+  if (currentTab==='usage') renderUsage();
+  else if (currentTab==='projects') renderProjects();
+  else if (currentTab==='outreach') renderOutreach();
+  else if (currentTab==='agents') renderAgents();
+}
+
+// Sortable table headers (Usage tab)
+document.addEventListener('click', e => {
+  const th = e.target.closest('th.sortable');
+  if (!th) return;
+  const col = th.dataset.col;
+  const wasDesc = th.classList.contains('sorted-desc');
+  th.closest('thead').querySelectorAll('th.sortable').forEach(h => h.classList.remove('sorted-desc','sorted-asc'));
+  const newDir = wasDesc ? 'asc' : 'desc';
+  th.classList.add('sorted-' + newDir);
+
+  // Detect which table this belongs to
+  const table = th.closest('table');
+  const sortTable = table?.dataset.sortTable;
+
+  if (sortTable === 'proj') {
+    projSortCol = col; projSortDir = newDir;
+    renderProjects();
+  } else if (sortTable === 'out') {
+    outSortCol = col; outSortDir = newDir;
+    renderOutreachTable();
+  } else if (sortTable === 'ag') {
+    agSortCol = col; agSortDir = newDir;
+    renderAgents();
+  } else {
+    // Usage (Team activity) table — no data-sort-table attr
+    usageSortCol = col; usageSortDir = newDir;
+    const userFilter = document.getElementById('usage-user').value;
+    const users = userFilter==='all' ? USERS : [userFilter];
+    const mult = DATE_MULT[document.getElementById('usage-date').value];
+    renderUsageTable(users, mult);
+  }
+});
+
+// Init
+populateUserDropdowns();
+renderUsage();
+</script>
+</body>
+</html>
