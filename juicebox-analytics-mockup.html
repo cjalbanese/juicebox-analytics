@@ -337,10 +337,12 @@
 // ══════════════════════════════════════
 // DATA MODEL — single source of truth
 // ══════════════════════════════════════
-const USERS = ['Sarah Kim','Mike Chen','Rachel Torres','David Park','Emily Liu','James Wu','Priya Patel','Tom Nguyen'];
+const USERS = ['Christopher Albanese','Sarah Kim','Mike Chen','Rachel Torres','David Park','Emily Liu','James Wu','Priya Patel','Tom Nguyen'];
+const LOGGED_IN_USER = 'Christopher Albanese';
 
 // Per-user base metrics (for 30-day period)
 const USER_DATA = {
+  'Christopher Albanese': { searches:62, reviewed:248, shortlisted:38, contacted:32, interested:5, contacts:86, exports:30, agentsActive:2 },
   'Sarah Kim':     { searches:89, reviewed:412, shortlisted:68, contacted:52, interested:11, contacts:148, exports:52, agentsActive:3 },
   'Mike Chen':     { searches:71, reviewed:298, shortlisted:42, contacted:38, interested:6,  contacts:105, exports:38, agentsActive:2 },
   'Rachel Torres': { searches:58, reviewed:224, shortlisted:35, contacted:30, interested:4,  contacts:78,  exports:28, agentsActive:1 },
@@ -357,8 +359,8 @@ const PREV_MULT = { '7': 0.82, '30': 0.78, '90': 0.71, '365': 0.45 }; // prior p
 
 // Projects
 const PROJECTS = [
-  { name:'Senior Backend Engineer', users:['Sarah Kim','Mike Chen'],       status:'Active',    found:312, reviewed:245, approved:180, shortlisted:68, contacted:52, replied:18, interested:9,  velocity:1.8 },
-  { name:'ML Engineer',             users:['Mike Chen'],                   status:'Active',    found:189, reviewed:156, approved:112, shortlisted:42, contacted:38, replied:11, interested:6,  velocity:2.1 },
+  { name:'Senior Backend Engineer', users:['Christopher Albanese','Sarah Kim','Mike Chen'], status:'Active', found:312, reviewed:245, approved:180, shortlisted:68, contacted:52, replied:18, interested:9, velocity:1.8 },
+  { name:'ML Engineer',             users:['Christopher Albanese','Mike Chen'], status:'Active', found:189, reviewed:156, approved:112, shortlisted:42, contacted:38, replied:11, interested:6, velocity:2.1 },
   { name:'Product Designer',        users:['Rachel Torres','Emily Liu'],   status:'Active',    found:156, reviewed:134, approved:95,  shortlisted:35, contacted:30, replied:8,  interested:4,  velocity:2.5 },
   { name:'DevOps Lead',             users:['David Park'],                  status:'Active',    found:98,  reviewed:78,  approved:52,  shortlisted:22, contacted:18, replied:4,  interested:1,  velocity:3.2 },
   { name:'Frontend Engineer',       users:['Emily Liu'],                   status:'Active',    found:267, reviewed:210, approved:155, shortlisted:55, contacted:48, replied:14, interested:7,  velocity:1.6 },
@@ -1329,8 +1331,8 @@ function setMode(mode) {
 
   // MVP auto-filter: simulate logged-in user seeing their own data
   if (mode === 'mvp') {
-    document.getElementById('usage-user').value = 'Sarah Kim';
-    document.getElementById('proj-user').value = 'Sarah Kim';
+    document.getElementById('usage-user').value = LOGGED_IN_USER;
+    document.getElementById('proj-user').value = LOGGED_IN_USER;
   } else {
     document.getElementById('usage-user').value = 'all';
     document.getElementById('proj-user').value = 'all';
