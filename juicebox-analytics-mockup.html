@@ -631,7 +631,9 @@ function updateInsightCount(el) {
 
 function renderInsightsBlock(containerId, insights) {
   const el = document.getElementById(containerId);
-  if (!el || !insights.length) { if (el) el.innerHTML = ''; return; }
+  if (!el) return;
+  if (currentMode === 'mvp' || !insights.length) { el.innerHTML = ''; el.style.display = 'none'; return; }
+  el.style.display = '';
   el.innerHTML = `<div class="insights-header">Insights <span class="badge">${insights.length}</span></div><div class="insight-cards">${insights.join('')}</div>`;
 }
 
@@ -805,7 +807,7 @@ function renderProjects() {
 
   const funnelData = ['found','reviewed','approved','shortlisted','contacted','replied','interested'].map(f => sumField(filtered, f));
   destroyChart('projects-funnel-chart');
-  charts['projects-funnel-chart'] = new Chart(document.getElementById('projects-funnel-chart'), { type:'bar', data:{ labels:['Found','Reviewed','Approved','Shortlisted','Contacted','Replied','Interested'], datasets:[{ data:funnelData, backgroundColor:['rgba(123,44,191,0.15)','rgba(123,44,191,0.22)','rgba(123,44,191,0.35)','rgba(123,44,191,0.48)','rgba(123,44,191,0.60)','rgba(123,44,191,0.78)',P], borderRadius:6, barPercentage:0.7 }] }, options:{...chartOpts, layout:{padding:{top:16}}, scales:{...chartOpts.scales, y:{...chartOpts.scales.y, grace:'10%'}}, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex; const pct=i>0?((funnelData[i]/funnelData[i-1])*100).toFixed(1)+'% conversion':'100%'; return `${ctx.parsed.y.toLocaleString()} (${pct})`;}}}}} });
+  charts['projects-funnel-chart'] = new Chart(document.getElementById('projects-funnel-chart'), { type:'bar', data:{ labels:['Found','Reviewed','Approved','Shortlisted','Contacted','Replied','Interested'], datasets:[{ data:funnelData, backgroundColor:['rgba(123,44,191,0.15)','rgba(123,44,191,0.22)','rgba(123,44,191,0.35)','rgba(123,44,191,0.48)','rgba(123,44,191,0.60)','rgba(123,44,191,0.78)',P], borderRadius:6, barPercentage:0.7 }] }, options:{...chartOpts, layout:{padding:{left:20,right:20,top:16}}, scales:{...chartOpts.scales, x:{...chartOpts.scales.x, offset:true}, y:{...chartOpts.scales.y, grace:'10%'}}, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex; const pct=i>0?((funnelData[i]/funnelData[i-1])*100).toFixed(1)+'% conversion':'100%'; return `${ctx.parsed.y.toLocaleString()} (${pct})`;}}}}} });
 
   const projRows = filtered.map(p => ({
     ...p, user: p.users.join(', '), iRate: p.contacted > 0 ? +(p.interested/p.contacted*100).toFixed(1) : 0
